@@ -12,12 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.philips.research.regression.MatrixConstruction.matrix;
 import static com.philips.research.regression.MatrixAssert.assertEqualsIgnoringScale;
+import static com.philips.research.regression.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
 
 @DisplayName("Hessian matrix")
-class HessianTests {
+class HessianTest {
 
     private Runner<Matrix<BigDecimal>> runner = new Runner<>();
 
