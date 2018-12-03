@@ -1,12 +1,6 @@
 package com.philips.research.regression;
 
-import dk.alexandra.fresco.framework.Application;
-import dk.alexandra.fresco.framework.DRes;
-import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
-import dk.alexandra.fresco.lib.collections.MatrixUtils;
-import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
-import dk.alexandra.fresco.lib.real.SReal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +14,7 @@ import static java.math.BigDecimal.valueOf;
 @DisplayName("Cholesky decomposition")
 class CholeskyTest {
 
-    private Runner<Matrix<BigDecimal>> runner = new Runner<>();
+    private MatrixRunner runner = new MatrixRunner();
 
     @Test
     @DisplayName("calculates the Cholesky decomposition")
@@ -35,20 +29,7 @@ class CholeskyTest {
             {valueOf(1.0 / sqrt(2.0)), valueOf(sqrt(3.0 / 2.0))}
         });
 
-        Application<Matrix<BigDecimal>, ProtocolBuilderNumeric> application = builder -> {
-            DRes<Matrix<DRes<SReal>>> closed, cholesky;
-            DRes<Matrix<DRes<BigDecimal>>> opened;
-
-            RealLinearAlgebra real = builder.realLinAlg();
-
-            closed = real.input(input, 1);
-            cholesky = builder.seq(new Cholesky(closed));
-            opened = real.openMatrix(cholesky);
-
-            return () -> new MatrixUtils().unwrapMatrix(opened);
-        };
-
-        assertEquals(expected, runner.run(application), 3);
+        assertEquals(expected, runner.run(input, Cholesky::new), 3);
     }
 }
 

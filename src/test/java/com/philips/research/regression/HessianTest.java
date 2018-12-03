@@ -2,6 +2,7 @@ package com.philips.research.regression;
 
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
+import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.lib.collections.MatrixUtils;
@@ -19,7 +20,7 @@ import static java.math.BigDecimal.valueOf;
 @DisplayName("Hessian matrix")
 class HessianTest {
 
-    private Runner<Matrix<BigDecimal>> runner = new Runner<>();
+    private MatrixRunner runner = new MatrixRunner();
 
     @Test
     @DisplayName("calculates an approximation of the Hessian matrix")
@@ -35,20 +36,7 @@ class HessianTest {
             {valueOf(-11.0), valueOf(-14.0)},
         });
 
-        Application<Matrix<BigDecimal>, ProtocolBuilderNumeric> application = builder -> {
-            DRes<Matrix<DRes<SReal>>> closed, hessian;
-            DRes<Matrix<DRes<BigDecimal>>> opened;
-
-            RealLinearAlgebra real = builder.realLinAlg();
-
-            closed = real.input(input, 1);
-            hessian = builder.seq(new Hessian(closed));
-            opened = real.openMatrix(hessian);
-
-            return () -> new MatrixUtils().unwrapMatrix(opened);
-        };
-
-        assertEquals(expected, runner.run(application), 5);
+        assertEquals(expected, runner.run(input, Hessian::new), 5);
     }
 }
 
