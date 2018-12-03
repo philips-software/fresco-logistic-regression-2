@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 
 import static com.philips.research.regression.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Hessian matrix")
@@ -25,16 +24,16 @@ class HessianTests {
     @Test
     @DisplayName("calculates an approximation of the Hessian matrix")
     void calculatesHessian() {
-        Matrix<BigDecimal> input = matrix(asList(
-            asList(valueOf(1.0), valueOf(2.0)),
-            asList(valueOf(3.0), valueOf(4.0)),
-            asList(valueOf(5.0), valueOf(6.0))
-        ));
+        Matrix<BigDecimal> input = matrix(new BigDecimal[][]{
+            {valueOf(1.0), valueOf(2.0)},
+            {valueOf(3.0), valueOf(4.0)},
+            {valueOf(5.0), valueOf(6.0)},
+        });
 
-        Matrix<BigDecimal> expected = matrix(asList(
-            asList(valueOf(-8.75), valueOf(-11.0)),
-            asList(valueOf(-11.0), valueOf(-14.0))
-        ));
+        Matrix<BigDecimal> expected = matrix(new BigDecimal[][]{
+            {valueOf(-8.75), valueOf(-11.0)},
+            {valueOf(-11.0), valueOf(-14.0)},
+        });
 
         Application<Matrix<BigDecimal>, ProtocolBuilderNumeric> application = builder -> {
             DRes<Matrix<DRes<SReal>>> closed, hessian;
