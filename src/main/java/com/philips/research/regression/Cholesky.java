@@ -38,14 +38,19 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
                         a[k][j] = seq.realNumeric().div(a[k][j], a[j][j]);
                     }
                 }
-                for (int r = 0; r < d; ++r) {
-                    for (int c = r + 1; c < d; c++) {
-                        a[r][c] = seq.realNumeric().sub(a[r][c], a[r][c]);
-                    }
-                }
+                convertToLowerTriangularMatrix(seq, a);
                 return () -> createMatrix(a);
             }
         );
+    }
+
+    private static void convertToLowerTriangularMatrix(ProtocolBuilderNumeric seq, DRes<SReal>[][] a) {
+        int size = a.length;
+        for (int r = 0; r < size; ++r) {
+            for (int c = r + 1; c < size; c++) {
+                a[r][c] = seq.realNumeric().sub(a[r][c], a[r][c]);
+            }
+        }
     }
 
     private DRes<SReal>[][] getElements(Matrix<DRes<SReal>> matrix) {
