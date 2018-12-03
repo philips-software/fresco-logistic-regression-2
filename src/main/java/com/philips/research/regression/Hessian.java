@@ -4,7 +4,10 @@ import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
+import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
 import dk.alexandra.fresco.lib.real.SReal;
+
+import java.math.BigDecimal;
 
 public class Hessian implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
 
@@ -16,9 +19,13 @@ public class Hessian implements Computation<Matrix<DRes<SReal>>, ProtocolBuilder
 
     @Override
     public DRes<Matrix<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
-        // TODO: transpose M
-        // TODO: multiply M by transposed M
-        // TODO: scale with -0.25
-        return input;
+        RealLinearAlgebra algebra = builder.realLinAlg();
+        return algebra.scale(
+            BigDecimal.valueOf(-0.25),
+            algebra.mult(
+                algebra.transpose(input),
+                input
+            )
+        );
     }
 }

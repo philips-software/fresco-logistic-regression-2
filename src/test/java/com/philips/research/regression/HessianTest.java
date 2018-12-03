@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static com.philips.research.regression.MatrixConstruction.matrix;
+import static com.philips.research.regression.MatrixAssert.assertEqualsIgnoringScale;
 import static java.math.BigDecimal.valueOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Hessian matrix")
 class HessianTests {
@@ -48,8 +48,7 @@ class HessianTests {
             return () -> new MatrixUtils().unwrapMatrix(opened);
         };
 
-        assertEquals(expected, runner.run(application));
+        assertEqualsIgnoringScale(expected, runner.run(application));
     }
 }
-
 
