@@ -7,7 +7,7 @@ import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
 import dk.alexandra.fresco.lib.real.SReal;
 
-import java.math.BigDecimal;
+import static java.math.BigDecimal.valueOf;
 
 public class Hessian implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
 
@@ -19,13 +19,7 @@ public class Hessian implements Computation<Matrix<DRes<SReal>>, ProtocolBuilder
 
     @Override
     public DRes<Matrix<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
-        RealLinearAlgebra algebra = builder.realLinAlg();
-        return algebra.scale(
-            BigDecimal.valueOf(-0.25),
-            algebra.mult(
-                algebra.transpose(input),
-                input
-            )
-        );
+        RealLinearAlgebra real = builder.realLinAlg();
+        return real.scale(valueOf(-0.25), real.mult(real.transpose(input), input));
     }
 }
