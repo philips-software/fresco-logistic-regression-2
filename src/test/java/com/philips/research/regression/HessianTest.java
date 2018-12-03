@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.philips.research.regression.MatrixAssert.assertEqualsIgnoringScale;
+import static com.philips.research.regression.MatrixAssert.assertEquals;
 import static com.philips.research.regression.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
 
@@ -48,7 +48,7 @@ class HessianTest {
             return () -> new MatrixUtils().unwrapMatrix(opened);
         };
 
-        assertEqualsIgnoringScale(expected, runner.run(application));
+        assertEquals(expected, runner.run(application), 5);
     }
 }
 

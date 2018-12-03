@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import static com.philips.research.regression.MatrixConversions.map;
+import static java.math.RoundingMode.HALF_UP;
 
 class MatrixAssert {
     static <T> void assertEquals(Matrix<T> expected, Matrix<T> actual) {
@@ -16,10 +17,10 @@ class MatrixAssert {
         );
     }
 
-    static void assertEqualsIgnoringScale(Matrix<BigDecimal> expected, Matrix<BigDecimal> actual) {
+    static void assertEquals(Matrix<BigDecimal> expected, Matrix<BigDecimal> actual, int scale) {
         assertEquals(
-            map(expected, BigDecimal::stripTrailingZeros),
-            map(actual, BigDecimal::stripTrailingZeros)
+          map(expected, value -> value.setScale(scale, HALF_UP)),
+          map(actual, value -> value.setScale(scale, HALF_UP))
         );
     }
 }
