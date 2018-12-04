@@ -36,4 +36,16 @@ class SubstitutionTest {
         assertEquals(expected, runner.run(L, b, ForwardSubstitution::new), 3);
     }
 
+    @Test
+    @DisplayName("performs back substitution")
+    void backSubstitution() {
+        Matrix<BigDecimal> L = matrix(new BigDecimal[][]{
+            {valueOf(1.0), valueOf(-2.0), valueOf(1.0)},
+            {valueOf(0.0), valueOf(1.0), valueOf(6.0)},
+            {valueOf(0.0), valueOf(0.0), valueOf(1.0)}
+        });
+        Vector<BigDecimal> b  = new Vector<>(asList(valueOf(4.0), valueOf(-1.0), valueOf(2.0)));
+        Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-24.0), valueOf(-13.0), valueOf(2.0)));
+        assertEquals(expected, runner.run(L, b, BackSubstitution::new), 3);
+    }
 }
