@@ -13,6 +13,7 @@ import dk.alexandra.fresco.suite.dummy.arithmetic.AbstractDummyArithmeticTest;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
 
 import java.math.BigDecimal;
+import java.util.Vector;
 
 import static dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy.SEQUENTIAL;
 
@@ -40,9 +41,7 @@ class Runner<OutputT> extends AbstractDummyArithmeticTest {
 
 class MatrixRunner extends Runner<Matrix<BigDecimal>> {
     Matrix<BigDecimal> run(Matrix<BigDecimal> input, Transformation transformation) {
-        Application<Matrix<BigDecimal>, ProtocolBuilderNumeric> application
-            = builder -> buildTransformation(input, transformation, builder);
-        return run(application);
+        return run(builder -> buildTransformation(input, transformation, builder));
     }
 
     private DRes<Matrix<BigDecimal>> buildTransformation(Matrix<BigDecimal> input, Transformation transformation, ProtocolBuilderNumeric builder) {
@@ -60,5 +59,29 @@ class MatrixRunner extends Runner<Matrix<BigDecimal>> {
 
     interface Transformation {
         Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> transform(DRes<Matrix<DRes<SReal>>> input);
+    }
+}
+
+class VectorRunner extends Runner<Vector<BigDecimal>> {
+    Vector<BigDecimal> run(Matrix<BigDecimal> l, Vector<BigDecimal> b, Transformation transformation) {
+        return run(builder -> buildTransformation(l, b, transformation, builder));
+    }
+
+    private DRes<Vector<BigDecimal>> buildTransformation(Matrix<BigDecimal> l, Vector<BigDecimal> b, Transformation transformation, ProtocolBuilderNumeric builder) {
+        DRes<Matrix<DRes<SReal>>> closedInputMatrix;
+        DRes<Vector<DRes<SReal>>> closedInputVector;
+        DRes<Vector<DRes<SReal>>> closedResult;
+
+        RealLinearAlgebra real = builder.realLinAlg();
+        closedInputMatrix = real.input(l, 1);
+        closedInputVector = real.input(b, 1);
+        closedResult = builder.seq(transformation.transform(closedInputMatrix, closedInputVector));
+        DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
+
+        return () -> new VectorUtils().unwrapVector(opened);
+    }
+
+    interface Transformation {
+        Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> transform(DRes<Matrix<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v);
     }
 }
