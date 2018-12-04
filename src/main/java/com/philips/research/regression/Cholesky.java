@@ -57,13 +57,8 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
 
     private DRes<SReal>[][] getElements(Matrix<DRes<SReal>> matrix) {
         return matrix.getRows().stream().map(
-            row -> row.toArray(Cholesky.<DRes<SReal>>newArray(0))
-        ).toArray(size -> newArray(size));
-    }
-
-    @SafeVarargs
-    private static <E> E[] newArray(int length, E... array) {
-        return Arrays.copyOf(array, length);
+            row -> row.toArray(GenericArrayUtils.<DRes<SReal>>newArray(0))
+        ).toArray(size -> GenericArrayUtils.newArray(size));
     }
 
     private static <T> Matrix<T> createMatrix(T[][] rows) {

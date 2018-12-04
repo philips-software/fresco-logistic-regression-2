@@ -32,7 +32,7 @@ public class ForwardSubstitution implements Computation<Vector<DRes<SReal>>, Pro
 
     private static DRes<SReal>[] computeForwardSubstitution(ProtocolBuilderNumeric seq, Matrix<DRes<SReal>> l, Vector<DRes<SReal>> b) {
         int n = b.size();
-        DRes<SReal>[] y = newArray(n);
+        DRes<SReal>[] y = GenericArrayUtils.newArray(n);
 
         for (int i = 0; i < n; ++i) {
             y[i] = b.get(i);
@@ -42,10 +42,5 @@ public class ForwardSubstitution implements Computation<Vector<DRes<SReal>>, Pro
             y[i] = seq.realNumeric().div(y[i], l.getRow(i).get(i));
         }
         return y;
-    }
-
-    @SafeVarargs
-    private static <E> E[] newArray(int length, E... array) {
-        return Arrays.copyOf(array, length);
     }
 }
