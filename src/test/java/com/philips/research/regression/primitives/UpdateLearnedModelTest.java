@@ -1,6 +1,5 @@
 package com.philips.research.regression.primitives;
 
-import com.philips.research.regression.Runner;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Vector;
 
+import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
@@ -20,7 +20,6 @@ import static java.util.Arrays.asList;
 
 @DisplayName("Learned model updates")
 class UpdateLearnedModelTest {
-    private Runner<Vector<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("updates learned model using previous value and first derivative")
@@ -34,24 +33,21 @@ class UpdateLearnedModelTest {
         Vector<BigDecimal> l = new Vector<>(asList(valueOf(7.0), valueOf(8.0)));
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(5.0), valueOf(6.0)));
 
-        beta = runner.run(new UpdateLearnedModelApplication(L, beta, l));
+        beta = run(new UpdateLearnedModelApplication(L, beta, l));
 
         assertEquals(asList(valueOf(33.0), valueOf(-12.0)), beta, 2);
     }
 
     private Matrix<BigDecimal> hessian(Matrix<BigDecimal> matrix) {
-        Runner<Matrix<BigDecimal>> runner = new Runner<>();
-        return runner.run(new MatrixTransformation(matrix, Hessian::new));
+        return run(new MatrixTransformation(matrix, Hessian::new));
     }
 
     private Matrix<BigDecimal> choleskyDecomposition(Matrix<BigDecimal> matrix) {
-        Runner<Matrix<BigDecimal>> runner = new Runner<>();
-        return runner.run(new MatrixTransformation(matrix, Cholesky::new));
+        return run(new MatrixTransformation(matrix, Cholesky::new));
     }
 
     private Matrix<BigDecimal> negate(Matrix<BigDecimal> matrix) {
-        Runner<Matrix<BigDecimal>> runner = new Runner<>();
-        return runner.run(new MatrixTransformation(matrix, input -> builder ->
+        return run(new MatrixTransformation(matrix, input -> builder ->
             builder.realLinAlg().scale(valueOf(-1.0), input))
         );
     }

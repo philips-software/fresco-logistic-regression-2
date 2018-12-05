@@ -9,11 +9,11 @@ import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
 
 import static dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy.SEQUENTIAL;
 
-public class Runner<OutputT> {
-    public OutputT run(Application<OutputT, ProtocolBuilderNumeric> application) {
+public class Runner {
+    static public <OutputT> OutputT run(Application<OutputT, ProtocolBuilderNumeric> application) {
         try {
             // run application inside test framework
-            return new TestFramework().run(application);
+            return new TestFramework<OutputT>().run(application);
         } catch (TestFrameworkException exception) {
             // strip test framework exceptions to get to the actual exception
             if (exception.getCause().getCause() instanceof RuntimeException) {
@@ -24,9 +24,9 @@ public class Runner<OutputT> {
         }
     }
 
-    private class TestFramework extends AbstractDummyArithmeticTest {
+    private static class TestFramework<OutputT> extends AbstractDummyArithmeticTest {
         private OutputT run(Application<OutputT, ProtocolBuilderNumeric> application) {
-            OutputReference output = new OutputReference();
+            OutputReference<OutputT> output = new OutputReference<>();
             runTest(new TestThreadRunner.TestThreadFactory<DummyArithmeticResourcePool, ProtocolBuilderNumeric>() {
                 @Override
                 public TestThreadRunner.TestThread<DummyArithmeticResourcePool, ProtocolBuilderNumeric> next() {
@@ -42,7 +42,7 @@ public class Runner<OutputT> {
         }
     }
 
-    private class OutputReference {
+    private static class OutputReference<OutputT> {
         OutputT value;
     }
 }

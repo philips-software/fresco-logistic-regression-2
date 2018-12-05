@@ -1,20 +1,18 @@
 package com.philips.research.regression.primitives;
 
-import com.philips.research.regression.Runner;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.util.MatrixAssert.assertEquals;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
 
 @DisplayName("Hessian matrix")
 class HessianTest {
-
-    private Runner<Matrix<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("calculates an approximation of the Hessian matrix")
@@ -30,7 +28,7 @@ class HessianTest {
             {valueOf(-11.0), valueOf(-14.0)},
         });
 
-        assertEquals(expected, runner.run(new MatrixTransformation(input, Hessian::new)), 5);
+        assertEquals(expected, run(new MatrixTransformation(input, Hessian::new)), 5);
     }
 }
 

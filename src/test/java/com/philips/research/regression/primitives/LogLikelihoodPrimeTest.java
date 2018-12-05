@@ -1,6 +1,5 @@
 package com.philips.research.regression.primitives;
 
-import com.philips.research.regression.Runner;
 import com.philips.research.regression.util.ListAssert;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
@@ -15,14 +14,14 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
-import static com.philips.research.regression.util.MatrixConstruction.matrix;
+import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.util.ListConversions.unwrap;
+import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
 @DisplayName("Log Likelihood Prime")
 class LogLikelihoodPrimeTest {
-    private Runner<List<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("calculates log(likelihood')")
@@ -34,7 +33,7 @@ class LogLikelihoodPrimeTest {
         Vector<BigDecimal> y = new Vector<>(asList(valueOf(0.0), valueOf(1.0)));
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2), valueOf(0.3), valueOf(0.4)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-0.9134458), valueOf(-1.826892), valueOf(-2.740337), valueOf(-3.653783)));
-        List<BigDecimal> result = runner.run(new LogLikelihoodPrimeApplication(x, y, beta));
+        List<BigDecimal> result = run(new LogLikelihoodPrimeApplication(x, y, beta));
         ListAssert.assertEquals(expected, result, 3);
     }
 }

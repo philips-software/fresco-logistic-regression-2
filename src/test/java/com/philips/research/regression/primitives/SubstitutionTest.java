@@ -1,6 +1,5 @@
 package com.philips.research.regression.primitives;
 
-import com.philips.research.regression.Runner;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
@@ -15,16 +14,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
-import static com.philips.research.regression.util.MatrixConstruction.matrix;
+import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
+import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
 @DisplayName("Forward and Backward Substitution")
 class SubstitutionTest {
-
-    private Runner<List<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("performs forward substitution")
@@ -36,7 +34,7 @@ class SubstitutionTest {
         });
         Vector<BigDecimal> b  = new Vector<>(asList(valueOf(2.0), valueOf(-1.0), valueOf(4.0)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(2.0), valueOf(3.0), valueOf(-16.0)));
-        assertEquals(expected, runner.run(new Substitution(L, b, ForwardSubstitution::new)), 3);
+        assertEquals(expected, run(new Substitution(L, b, ForwardSubstitution::new)), 3);
     }
 
     @Test
@@ -49,7 +47,7 @@ class SubstitutionTest {
         });
         Vector<BigDecimal> b  = new Vector<>(asList(valueOf(4.0), valueOf(-1.0), valueOf(2.0)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-24.0), valueOf(-13.0), valueOf(2.0)));
-        assertEquals(expected, runner.run(new Substitution(L, b, BackSubstitution::new)), 3);
+        assertEquals(expected, run(new Substitution(L, b, BackSubstitution::new)), 3);
     }
 }
 
