@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.philips.research.regression.util.GenericArrayCreation.newArray;
+import static java.math.BigDecimal.ZERO;
 
 class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
     private DRes<Matrix<DRes<SReal>>> input;
@@ -48,7 +49,7 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
         int size = a.length;
         for (int r = 0; r < size; r++) {
             for (int c = r + 1; c < size; c++) {
-                a[r][c] = seq.realNumeric().sub(a[r][c], a[r][c]);
+                a[r][c] = seq.realNumeric().known(ZERO);
             }
         }
     }
