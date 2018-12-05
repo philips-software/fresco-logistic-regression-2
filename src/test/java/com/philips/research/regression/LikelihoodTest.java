@@ -1,6 +1,11 @@
 package com.philips.research.regression;
 
+import dk.alexandra.fresco.framework.DRes;
+import dk.alexandra.fresco.framework.builder.Computation;
+import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
+import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
+import dk.alexandra.fresco.lib.real.SReal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Likelihood")
 class LikelihoodTest {
-    private BigDecimalRunner runner = new BigDecimalRunner();
+    private LikelihoodRunner runner = new LikelihoodRunner();
 
     @Test
     @DisplayName("computes likelihood")
@@ -52,5 +57,25 @@ class LikelihoodTest {
         VectorRunner runner = new VectorRunner();
         Vector<BigDecimal> result = runner.run(x, y, beta, LogLikelihoodPrime::new);
         VectorAssert.assertEquals(expected, result, 3);
+    }
+}
+
+class LikelihoodRunner extends Runner<BigDecimal> {
+    BigDecimal run(Vector<BigDecimal> v1, Vector<BigDecimal> v2, Transformation transformation) {
+        return run(builder -> buildTransformation(v1, v2, transformation, builder));
+    }
+
+    private DRes<BigDecimal> buildTransformation(Vector<BigDecimal> v1, Vector<BigDecimal> v2, Transformation transformation, ProtocolBuilderNumeric builder) {
+        DRes<Vector<DRes<SReal>>> closedV1, closedV2;
+
+        RealLinearAlgebra real = builder.realLinAlg();
+        closedV1 = real.input(v1, 1);
+        closedV2 = real.input(v2, 1);
+        DRes<SReal> closedResult = builder.seq(transformation.transform(closedV1, closedV2));
+        return builder.realNumeric().open(closedResult);
+    }
+
+    interface Transformation {
+        Computation<SReal, ProtocolBuilderNumeric> transform(DRes<Vector<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v);
     }
 }

@@ -126,23 +126,3 @@ class VectorRunner extends Runner<Vector<BigDecimal>> {
         Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> transform(DRes<Matrix<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v1, DRes<Vector<DRes<SReal>>> v2);
     }
 }
-
-class BigDecimalRunner extends Runner<BigDecimal> {
-    BigDecimal run(Vector<BigDecimal> v1, Vector<BigDecimal> v2, Transformation transformation) {
-        return run(builder -> buildTransformation(v1, v2, transformation, builder));
-    }
-
-    private DRes<BigDecimal> buildTransformation(Vector<BigDecimal> v1, Vector<BigDecimal> v2, Transformation transformation, ProtocolBuilderNumeric builder) {
-        DRes<Vector<DRes<SReal>>> closedV1, closedV2;
-
-        RealLinearAlgebra real = builder.realLinAlg();
-        closedV1 = real.input(v1, 1);
-        closedV2 = real.input(v2, 1);
-        DRes<SReal> closedResult = builder.seq(transformation.transform(closedV1, closedV2));
-        return builder.realNumeric().open(closedResult);
-    }
-
-    interface Transformation {
-        Computation<SReal, ProtocolBuilderNumeric> transform(DRes<Vector<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v);
-    }
-}
