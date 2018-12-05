@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import static com.philips.research.regression.MatrixConstruction.matrix;
 import static com.philips.research.regression.VectorAssert.assertEquals;
+import static com.philips.research.regression.VectorConversions.unwrapVector;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
@@ -71,7 +72,7 @@ class Substitution implements Application<Vector<BigDecimal>, ProtocolBuilderNum
         closedVector = real.input(vector, 1);
         closedResult = builder.seq(transformation.transform(closedMatrix, closedVector));
         DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
-        return () -> new VectorUtils().unwrapVector(opened);
+        return () -> unwrapVector(opened);
     }
 
     interface Transformation {

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.Vector;
 
 import static com.philips.research.regression.MatrixConstruction.matrix;
+import static com.philips.research.regression.VectorConversions.unwrapVector;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
@@ -56,6 +57,6 @@ class LogLikelihoodApplication implements Application<Vector<BigDecimal>, Protoc
         closedBeta = real.input(beta, 1);
         closedResult = builder.seq(new LogLikelihoodPrime(closedX, closedY, closedBeta));
         DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
-        return () -> new VectorUtils().unwrapVector(opened);
+        return () -> unwrapVector(opened);
     }
 }
