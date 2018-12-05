@@ -4,14 +4,17 @@ import com.philips.research.regression.util.GenericArrayCreation;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
+import dk.alexandra.fresco.framework.value.SInt;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.lib.real.SReal;
+import dk.alexandra.fresco.lib.real.fixed.SFixed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.philips.research.regression.util.GenericArrayCreation.newArray;
 import static java.math.BigDecimal.ZERO;
+import static java.math.BigInteger.valueOf;
 
 class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
     private DRes<Matrix<DRes<SReal>>> input;
@@ -35,7 +38,7 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
                         );
                     }
                 }
-                a[j][j] = seq.realAdvanced().sqrt(a[j][j]);
+                a[j][j] = seq.seq(new RealNumericSqrt(a[j][j]));
                 for (int k = j + 1; k < d; k++) {
                     a[k][j] = seq.realNumeric().div(a[k][j], a[j][j]);
                 }
@@ -68,5 +71,26 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
             mat.add(new ArrayList<>(Arrays.asList(row)));
         }
         return new Matrix<>(h, w, mat);
+    }
+}
+
+class RealNumericSqrt implements Computation<SReal, ProtocolBuilderNumeric> {
+
+    private DRes<SReal> input;
+
+    RealNumericSqrt(DRes<SReal> input) {
+        this.input = input;
+    }
+
+    @Override
+    public DRes<SReal> buildComputation(ProtocolBuilderNumeric builder) {
+        return builder.seq(seq -> {
+            SFixed fixed = (SFixed) input.out();
+            DRes<SInt> underlyingInt = fixed.getSInt();
+            int precision = fixed.getPrecision();
+            DRes<SInt> scaled = seq.numeric().mult(valueOf(2).pow(precision), underlyingInt);
+            DRes<SInt> sqrt = seq.advancedNumeric().sqrt(scaled, seq.getBasicNumericContext().getMaxBitLength());
+            return new SFixed(sqrt, precision);
+        });
     }
 }
