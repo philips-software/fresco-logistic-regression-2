@@ -29,6 +29,12 @@ class VectorRunner extends Runner<Vector<BigDecimal>> {
         return () -> new VectorUtils().unwrapVector(opened);
     }
 
+    interface TransformationMV {
+        Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> transform(DRes<Matrix<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v);
+    }
+}
+
+class VectorRunner2 extends Runner<Vector<BigDecimal>> {
     Vector<BigDecimal> run(Matrix<BigDecimal> m, Vector<BigDecimal> v1, Vector<BigDecimal> v2, TransformationMVV transformation) {
         return run(builder-> buildTransformation(m, v1, v2, transformation, builder));
     }
@@ -47,10 +53,6 @@ class VectorRunner extends Runner<Vector<BigDecimal>> {
         DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
 
         return () -> new VectorUtils().unwrapVector(opened);
-    }
-
-    interface TransformationMV {
-        Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> transform(DRes<Matrix<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v);
     }
 
     interface TransformationMVV {

@@ -54,7 +54,7 @@ class LikelihoodTest {
         Vector<BigDecimal> y = new Vector<>(asList(valueOf(0.0), valueOf(1.0)));
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2), valueOf(0.3), valueOf(0.4)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-0.9134458), valueOf(-1.826892), valueOf(-2.740337), valueOf(-3.653783)));
-        VectorRunner runner = new VectorRunner();
+        VectorRunner2 runner = new VectorRunner2();
         Vector<BigDecimal> result = runner.run(x, y, beta, LogLikelihoodPrime::new);
         VectorAssert.assertEquals(expected, result, 3);
     }
