@@ -20,11 +20,12 @@ import static com.philips.research.regression.util.ListConversions.unwrap;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
+@DisplayName("Log Likelihood Prime")
 class LogLikelihoodPrimeTest {
     private Runner<List<BigDecimal>> runner = new Runner<>();
 
     @Test
-    @DisplayName("first derivative of log likelihood")
+    @DisplayName("calculates log(likelihood')")
     void logLikelihoodPrime() {
         Matrix<BigDecimal> x = matrix(new BigDecimal[][]{
             {valueOf(1.0), valueOf(2.0), valueOf(3.0), valueOf(4.0)},
