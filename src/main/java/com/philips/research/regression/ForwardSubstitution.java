@@ -15,7 +15,7 @@ public class ForwardSubstitution implements Computation<Vector<DRes<SReal>>, Pro
     private final DRes<Matrix<DRes<SReal>>> matrix;
     private final DRes<Vector<DRes<SReal>>> vector;
 
-    public ForwardSubstitution(DRes<Matrix<DRes<SReal>>> matrix, DRes<Vector<DRes<SReal>>> vector) {
+    ForwardSubstitution(DRes<Matrix<DRes<SReal>>> matrix, DRes<Vector<DRes<SReal>>> vector) {
         this.matrix = matrix;
         this.vector = vector;
     }

@@ -3,14 +3,9 @@ package com.philips.research.regression;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
-import dk.alexandra.fresco.lib.collections.Matrix;
-import dk.alexandra.fresco.lib.real.AdvancedRealNumeric;
-import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
 import dk.alexandra.fresco.lib.real.SReal;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -35,16 +30,8 @@ public class Likelihood implements Computation<SReal, ProtocolBuilderNumeric> {
             DRes<SReal> negProd = seq.realNumeric().mult(new BigDecimal(-1), prod);
             DRes<SReal> exponential = seq.realAdvanced().exp(negProd);
             DRes<SReal> one = seq.realNumeric().known(new BigDecimal(1));
-            DRes<SReal> result = seq.realNumeric().div(one, seq.realNumeric().add(one, exponential));
-            return () -> result.out();
+            return seq.realNumeric().div(one, seq.realNumeric().add(one, exponential));
         });
     }
 
-    private static <T> Matrix<T> createVectorMatrix(T[] row) {
-        int h = 1;
-        int w = row.length;
-        ArrayList<ArrayList<T>> mat = new ArrayList<>();
-        mat.add(new ArrayList<>(Arrays.asList(row)));
-        return new Matrix<>(h, w, mat);
-    }
 }

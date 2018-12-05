@@ -15,7 +15,7 @@ public class BackSubstitution implements Computation<Vector<DRes<SReal>>, Protoc
     private final DRes<Matrix<DRes<SReal>>> matrix;
     private final DRes<Vector<DRes<SReal>>> vector;
 
-    public BackSubstitution(DRes<Matrix<DRes<SReal>>> matrix, DRes<Vector<DRes<SReal>>> vector) {
+    BackSubstitution(DRes<Matrix<DRes<SReal>>> matrix, DRes<Vector<DRes<SReal>>> vector) {
         this.matrix = matrix;
         this.vector = vector;
     }

@@ -1,12 +1,6 @@
 package com.philips.research.regression;
 
-import dk.alexandra.fresco.framework.Application;
-import dk.alexandra.fresco.framework.DRes;
-import dk.alexandra.fresco.framework.builder.Computation;
-import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
-import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
-import dk.alexandra.fresco.lib.real.SReal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

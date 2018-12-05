@@ -32,7 +32,6 @@ class LikelihoodTest {
     @Test
     @DisplayName("expects vectors of equal size")
     void likelihoodVectorSize() {
-        boolean seenException = false;
         try {
             Vector<BigDecimal> xi = new Vector<>(asList(valueOf(1.0), valueOf(2.0)));
             Vector<BigDecimal> beta = new Vector<>(Collections.singletonList(valueOf(0.1)));
@@ -40,9 +39,7 @@ class LikelihoodTest {
             fail();
         } catch (TestFrameworkException ex) {
             assertEquals(IllegalArgumentException.class, ex.getCause().getCause().getClass());
-            seenException = true;
         }
-        assertTrue(seenException);
     }
 
     @Test
