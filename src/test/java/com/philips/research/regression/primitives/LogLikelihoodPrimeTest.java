@@ -1,7 +1,7 @@
 package com.philips.research.regression.primitives;
 
 import com.philips.research.regression.Runner;
-import com.philips.research.regression.util.VectorAssert;
+import com.philips.research.regression.util.ListAssert;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -12,15 +12,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Vector;
 
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
-import static com.philips.research.regression.util.VectorConversions.unwrapVector;
+import static com.philips.research.regression.util.ListConversions.unwrap;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
 class LogLikelihoodPrimeTest {
-    private Runner<Vector<BigDecimal>> runner = new Runner<>();
+    private Runner<List<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("first derivative of log likelihood")
@@ -32,12 +33,12 @@ class LogLikelihoodPrimeTest {
         Vector<BigDecimal> y = new Vector<>(asList(valueOf(0.0), valueOf(1.0)));
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2), valueOf(0.3), valueOf(0.4)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-0.9134458), valueOf(-1.826892), valueOf(-2.740337), valueOf(-3.653783)));
-        Vector<BigDecimal> result = runner.run(new LogLikelihoodPrimeApplication(x, y, beta));
-        VectorAssert.assertEquals(expected, result, 3);
+        List<BigDecimal> result = runner.run(new LogLikelihoodPrimeApplication(x, y, beta));
+        ListAssert.assertEquals(expected, result, 3);
     }
 }
 
-class LogLikelihoodPrimeApplication implements Application<Vector<BigDecimal>, ProtocolBuilderNumeric> {
+class LogLikelihoodPrimeApplication implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
 
     private final Matrix<BigDecimal> x;
     private final Vector<BigDecimal> y;
@@ -50,7 +51,7 @@ class LogLikelihoodPrimeApplication implements Application<Vector<BigDecimal>, P
     }
 
     @Override
-    public DRes<Vector<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
+    public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
         DRes<Matrix<DRes<SReal>>> closedX;
         DRes<Vector<DRes<SReal>>> closedY, closedBeta, closedResult;
         RealLinearAlgebra real = builder.realLinAlg();
@@ -59,6 +60,6 @@ class LogLikelihoodPrimeApplication implements Application<Vector<BigDecimal>, P
         closedBeta = real.input(beta, 1);
         closedResult = builder.seq(new LogLikelihoodPrime(closedX, closedY, closedBeta));
         DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
-        return () -> unwrapVector(opened);
+        return () -> unwrap(opened);
     }
 }

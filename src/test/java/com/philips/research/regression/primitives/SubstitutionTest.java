@@ -12,18 +12,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Vector;
 
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
-import static com.philips.research.regression.util.VectorAssert.assertEquals;
-import static com.philips.research.regression.util.VectorConversions.unwrapVector;
+import static com.philips.research.regression.util.ListAssert.assertEquals;
+import static com.philips.research.regression.util.ListConversions.unwrap;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 
 @DisplayName("Forward and Backward Substitution")
 class SubstitutionTest {
 
-    private Runner<Vector<BigDecimal>> runner = new Runner<>();
+    private Runner<List<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("performs forward substitution")
@@ -52,7 +53,7 @@ class SubstitutionTest {
     }
 }
 
-class Substitution implements Application<Vector<BigDecimal>, ProtocolBuilderNumeric> {
+class Substitution implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
 
     private final Matrix<BigDecimal> matrix;
     private final Vector<BigDecimal> vector;
@@ -65,7 +66,7 @@ class Substitution implements Application<Vector<BigDecimal>, ProtocolBuilderNum
     }
 
     @Override
-    public DRes<Vector<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
+    public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
         DRes<Matrix<DRes<SReal>>> closedMatrix;
         DRes<Vector<DRes<SReal>>> closedVector, closedResult;
         RealLinearAlgebra real = builder.realLinAlg();
@@ -73,7 +74,7 @@ class Substitution implements Application<Vector<BigDecimal>, ProtocolBuilderNum
         closedVector = real.input(vector, 1);
         closedResult = builder.seq(transformation.transform(closedMatrix, closedVector));
         DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
-        return () -> unwrapVector(opened);
+        return () -> unwrap(opened);
     }
 
     interface Transformation {
