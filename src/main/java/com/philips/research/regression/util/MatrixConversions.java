@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.util;
 
 import dk.alexandra.fresco.lib.collections.Matrix;
 

@@ -9,8 +9,8 @@ import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
 
 import static dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy.SEQUENTIAL;
 
-class Runner<OutputT> {
-    OutputT run(Application<OutputT, ProtocolBuilderNumeric> application) {
+public class Runner<OutputT> {
+    public OutputT run(Application<OutputT, ProtocolBuilderNumeric> application) {
         try {
             // run application inside test framework
             return new TestFramework().run(application);

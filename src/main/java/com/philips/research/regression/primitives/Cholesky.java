@@ -1,5 +1,6 @@
-package com.philips.research.regression;
+package com.philips.research.regression.primitives;
 
+import com.philips.research.regression.util.GenericArrayCreation;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -9,7 +10,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.philips.research.regression.GenericArrayCreation.newArray;
+import static com.philips.research.regression.util.GenericArrayCreation.newArray;
 
 class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
     private DRes<Matrix<DRes<SReal>>> input;

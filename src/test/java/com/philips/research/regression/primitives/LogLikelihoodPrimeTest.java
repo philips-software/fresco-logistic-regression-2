@@ -1,5 +1,7 @@
-package com.philips.research.regression;
+package com.philips.research.regression.primitives;
 
+import com.philips.research.regression.Runner;
+import com.philips.research.regression.util.VectorAssert;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -12,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Vector;
 
-import static com.philips.research.regression.MatrixConstruction.matrix;
-import static com.philips.research.regression.VectorConversions.unwrapVector;
+import static com.philips.research.regression.util.MatrixConstruction.matrix;
+import static com.philips.research.regression.util.VectorConversions.unwrapVector;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.asList;
 

@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.util;
 
 import dk.alexandra.fresco.lib.collections.Matrix;
 import org.junit.Assert;
@@ -6,18 +6,18 @@ import org.junit.Assert;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.philips.research.regression.MatrixConversions.map;
+import static com.philips.research.regression.util.MatrixConversions.map;
 import static java.math.RoundingMode.HALF_UP;
 
-class MatrixAssert {
-    static <T> void assertEquals(Matrix<T> expected, Matrix<T> actual) {
+public class MatrixAssert {
+    public static <T> void assertEquals(Matrix<T> expected, Matrix<T> actual) {
         Assert.assertEquals(
             new MatrixWithEquality<>(expected),
             new MatrixWithEquality<>(actual)
         );
     }
 
-    static void assertEquals(Matrix<BigDecimal> expected, Matrix<BigDecimal> actual, int scale) {
+    public static void assertEquals(Matrix<BigDecimal> expected, Matrix<BigDecimal> actual, int scale) {
         assertEquals(
           map(expected, value -> value.setScale(scale, HALF_UP)),
           map(actual, value -> value.setScale(scale, HALF_UP))

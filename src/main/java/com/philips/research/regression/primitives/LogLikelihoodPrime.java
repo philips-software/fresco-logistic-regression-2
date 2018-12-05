@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.primitives;
 
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
@@ -9,7 +9,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.util.Arrays;
 import java.util.Vector;
 
-import static com.philips.research.regression.GenericArrayCreation.newArray;
+import static com.philips.research.regression.util.GenericArrayCreation.newArray;
 import static java.math.BigDecimal.ZERO;
 
 public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {

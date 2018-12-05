@@ -1,13 +1,14 @@
-package com.philips.research.regression;
+package com.philips.research.regression.primitives;
 
+import com.philips.research.regression.Runner;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.philips.research.regression.MatrixAssert.assertEquals;
-import static com.philips.research.regression.MatrixConstruction.matrix;
+import static com.philips.research.regression.util.MatrixAssert.assertEquals;
+import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static java.lang.Math.sqrt;
 import static java.math.BigDecimal.valueOf;
 

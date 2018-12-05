@@ -1,5 +1,6 @@
-package com.philips.research.regression;
+package com.philips.research.regression.primitives;
 
+import com.philips.research.regression.Runner;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
