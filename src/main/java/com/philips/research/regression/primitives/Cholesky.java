@@ -21,32 +21,27 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
 
     @Override
     public DRes<Matrix<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
-        return builder.seq(
-            seq -> () -> input.out()
-        ).seq(
-            this::computeCholesky
-        );
-    }
-
-    private DRes<Matrix<DRes<SReal>>> computeCholesky(ProtocolBuilderNumeric seq, Matrix<DRes<SReal>> matrix) {
-        int d = matrix.getHeight();
-        DRes<SReal>[][] a = getElements(matrix);
-        for (int j = 0; j < d; j++) {
-            for (int k = 0; k < j; k++) {
-                for (int i = j; i < d; i++) {
-                    a[i][j] = seq.realNumeric().sub(
-                        a[i][j],
-                        seq.realNumeric().mult(a[i][k], a[j][k])
-                    );
+        return builder.seq(seq -> {
+            Matrix<DRes<SReal>> matrix = input.out();
+            int d = matrix.getHeight();
+            DRes<SReal>[][] a = getElements(matrix);
+            for (int j = 0; j < d; j++) {
+                for (int k = 0; k < j; k++) {
+                    for (int i = j; i < d; i++) {
+                        a[i][j] = seq.realNumeric().sub(
+                            a[i][j],
+                            seq.realNumeric().mult(a[i][k], a[j][k])
+                        );
+                    }
+                }
+                a[j][j] = seq.realAdvanced().sqrt(a[j][j]);
+                for (int k = j + 1; k < d; k++) {
+                    a[k][j] = seq.realNumeric().div(a[k][j], a[j][j]);
                 }
             }
-            a[j][j] = seq.realAdvanced().sqrt(a[j][j]);
-            for (int k = j+1; k < d; k++) {
-                a[k][j] = seq.realNumeric().div(a[k][j], a[j][j]);
-            }
-        }
-        convertToLowerTriangularMatrix(seq, a);
-        return () -> createMatrix(a);
+            convertToLowerTriangularMatrix(seq, a);
+            return () -> createMatrix(a);
+        });
     }
 
     private static void convertToLowerTriangularMatrix(ProtocolBuilderNumeric seq, DRes<SReal>[][] a) {
@@ -68,7 +63,7 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
         int h = rows.length;
         int w = rows[0].length;
         ArrayList<ArrayList<T>> mat = new ArrayList<>();
-        for (T[] row: rows) {
+        for (T[] row : rows) {
             mat.add(new ArrayList<>(Arrays.asList(row)));
         }
         return new Matrix<>(h, w, mat);
