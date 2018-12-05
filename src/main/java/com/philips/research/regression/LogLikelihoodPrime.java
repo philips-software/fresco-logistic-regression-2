@@ -9,6 +9,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.util.Arrays;
 import java.util.Vector;
 
+import static com.philips.research.regression.GenericArrayCreation.newArray;
 import static java.math.BigDecimal.ZERO;
 
 public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
@@ -24,7 +25,7 @@ public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, Prot
 
     @Override
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
-        DRes<SReal>[] result = GenericArrayUtils.newArray(beta.out().size());
+        DRes<SReal>[] result = newArray(beta.out().size());
         Arrays.fill(result, builder.realNumeric().known(ZERO));
         for (int k=0; k<result.length; k++) {
             for (int i=0; i<x.out().getRows().size(); i++) {

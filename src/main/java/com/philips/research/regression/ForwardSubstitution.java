@@ -9,6 +9,8 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.util.Arrays;
 import java.util.Vector;
 
+import static com.philips.research.regression.GenericArrayCreation.newArray;
+
 public class ForwardSubstitution implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> matrix;
     private final DRes<Vector<DRes<SReal>>> vector;
@@ -32,7 +34,7 @@ public class ForwardSubstitution implements Computation<Vector<DRes<SReal>>, Pro
 
     private static DRes<SReal>[] computeForwardSubstitution(ProtocolBuilderNumeric seq, Matrix<DRes<SReal>> l, Vector<DRes<SReal>> b) {
         int n = b.size();
-        DRes<SReal>[] y = GenericArrayUtils.newArray(n);
+        DRes<SReal>[] y = newArray(n);
 
         for (int i = 0; i < n; ++i) {
             y[i] = b.get(i);

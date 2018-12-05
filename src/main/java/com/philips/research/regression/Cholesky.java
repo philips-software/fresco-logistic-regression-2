@@ -9,6 +9,8 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.philips.research.regression.GenericArrayCreation.newArray;
+
 class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
     private DRes<Matrix<DRes<SReal>>> input;
 
@@ -57,8 +59,8 @@ class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeri
 
     private DRes<SReal>[][] getElements(Matrix<DRes<SReal>> matrix) {
         return matrix.getRows().stream().map(
-            row -> row.toArray(GenericArrayUtils.<DRes<SReal>>newArray(0))
-        ).toArray(size -> GenericArrayUtils.newArray(size));
+            row -> row.toArray(GenericArrayCreation.<DRes<SReal>>newArray(0))
+        ).toArray(size -> newArray(size));
     }
 
     private static <T> Matrix<T> createMatrix(T[][] rows) {
