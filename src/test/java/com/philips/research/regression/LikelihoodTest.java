@@ -40,7 +40,7 @@ class LikelihoodTest {
     }
 
     @Test
-    @DisplayName("first deriviative of log likelihood")
+    @DisplayName("first derivative of log likelihood")
     void logLikelihoodPrime() {
         Matrix<BigDecimal> x = matrix(new BigDecimal[][]{
             {valueOf(1.0), valueOf(2.0), valueOf(3.0), valueOf(4.0)},

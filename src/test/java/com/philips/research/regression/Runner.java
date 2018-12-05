@@ -51,7 +51,7 @@ class Runner<OutputT> {
         }
     }
 
-    class OutputReference {
+    private class OutputReference {
         OutputT value;
     }
 }
