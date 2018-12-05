@@ -13,7 +13,7 @@ import static java.math.BigDecimal.valueOf;
 @DisplayName("Hessian matrix")
 class HessianTest {
 
-    private MatrixRunner runner = new MatrixRunner();
+    private Runner<Matrix<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("calculates an approximation of the Hessian matrix")
@@ -29,7 +29,7 @@ class HessianTest {
             {valueOf(-11.0), valueOf(-14.0)},
         });
 
-        assertEquals(expected, runner.run(input, Hessian::new), 5);
+        assertEquals(expected, runner.run(new MatrixTransformation(input, Hessian::new)), 5);
     }
 }
 

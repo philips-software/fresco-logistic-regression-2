@@ -14,7 +14,7 @@ import static java.math.BigDecimal.valueOf;
 @DisplayName("Cholesky decomposition")
 class CholeskyTest {
 
-    private MatrixRunner runner = new MatrixRunner();
+    private Runner<Matrix<BigDecimal>> runner = new Runner<>();
 
     @Test
     @DisplayName("calculates the Cholesky decomposition")
@@ -29,7 +29,7 @@ class CholeskyTest {
             {valueOf(1.0 / sqrt(2.0)), valueOf(sqrt(3.0 / 2.0))}
         });
 
-        assertEquals(expected, runner.run(input, Cholesky::new), 3);
+        assertEquals(expected, runner.run(new MatrixTransformation(input, Cholesky::new)), 3);
     }
 }
 

@@ -1,5 +1,6 @@
 package com.philips.research.regression;
 
+import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -10,12 +11,18 @@ import dk.alexandra.fresco.lib.real.SReal;
 
 import java.math.BigDecimal;
 
-class MatrixRunner extends Runner<Matrix<BigDecimal>> {
-    Matrix<BigDecimal> run(Matrix<BigDecimal> input, Transformation transformation) {
-        return run(builder -> buildTransformation(input, transformation, builder));
+class MatrixTransformation implements Application<Matrix<BigDecimal>, ProtocolBuilderNumeric> {
+
+    private final Transformation transformation;
+    private final Matrix<BigDecimal> input;
+
+    MatrixTransformation(Matrix<BigDecimal> input, Transformation transformation) {
+        this.transformation = transformation;
+        this.input = input;
     }
 
-    private DRes<Matrix<BigDecimal>> buildTransformation(Matrix<BigDecimal> input, Transformation transformation, ProtocolBuilderNumeric builder) {
+    @Override
+    public DRes<Matrix<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
         DRes<Matrix<DRes<SReal>>> closed, calculated;
         DRes<Matrix<DRes<BigDecimal>>> opened;
 
