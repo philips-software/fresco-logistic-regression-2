@@ -1,6 +1,5 @@
 package com.philips.research.regression;
 
-import dk.alexandra.fresco.framework.TestFrameworkException;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,9 +10,10 @@ import java.util.Vector;
 
 import static com.philips.research.regression.MatrixConstruction.matrix;
 import static java.math.BigDecimal.valueOf;
-import static java.math.RoundingMode.*;
+import static java.math.RoundingMode.HALF_UP;
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Likelihood")
 class LikelihoodTest {
@@ -32,14 +32,11 @@ class LikelihoodTest {
     @Test
     @DisplayName("expects vectors of equal size")
     void likelihoodVectorSize() {
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             Vector<BigDecimal> xi = new Vector<>(asList(valueOf(1.0), valueOf(2.0)));
             Vector<BigDecimal> beta = new Vector<>(Collections.singletonList(valueOf(0.1)));
             runner.run(xi, beta, Likelihood::new);
-            fail();
-        } catch (TestFrameworkException ex) {
-            assertEquals(IllegalArgumentException.class, ex.getCause().getCause().getClass());
-        }
+        });
     }
 
     @Test
