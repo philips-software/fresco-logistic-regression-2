@@ -14,8 +14,7 @@ import static java.math.BigDecimal.ZERO;
 
 public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> x;
-    private final DRes<Vector<DRes<SReal>>> y;
-    private final DRes<Vector<DRes<SReal>>> beta;
+    private final DRes<Vector<DRes<SReal>>> y, beta;
 
     LogLikelihoodPrime(DRes<Matrix<DRes<SReal>>> x, DRes<Vector<DRes<SReal>>> y, DRes<Vector<DRes<SReal>>> beta) {
         this.x = x;
