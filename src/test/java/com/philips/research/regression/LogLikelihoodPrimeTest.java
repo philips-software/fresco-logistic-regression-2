@@ -30,18 +30,18 @@ class LogLikelihoodPrimeTest {
         Vector<BigDecimal> y = new Vector<>(asList(valueOf(0.0), valueOf(1.0)));
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2), valueOf(0.3), valueOf(0.4)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-0.9134458), valueOf(-1.826892), valueOf(-2.740337), valueOf(-3.653783)));
-        Vector<BigDecimal> result = runner.run(new LogLikelihoodApplication(x, y, beta));
+        Vector<BigDecimal> result = runner.run(new LogLikelihoodPrimeApplication(x, y, beta));
         VectorAssert.assertEquals(expected, result, 3);
     }
 }
 
-class LogLikelihoodApplication implements Application<Vector<BigDecimal>, ProtocolBuilderNumeric> {
+class LogLikelihoodPrimeApplication implements Application<Vector<BigDecimal>, ProtocolBuilderNumeric> {
 
     private final Matrix<BigDecimal> x;
     private final Vector<BigDecimal> y;
     private final Vector<BigDecimal> beta;
 
-    LogLikelihoodApplication(Matrix<BigDecimal> x, Vector<BigDecimal> y, Vector<BigDecimal>beta) {
+    LogLikelihoodPrimeApplication(Matrix<BigDecimal> x, Vector<BigDecimal> y, Vector<BigDecimal>beta) {
         this.x = x;
         this.y = y;
         this.beta = beta;
