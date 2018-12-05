@@ -1,7 +1,7 @@
 package com.philips.research.regression;
 
+import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
-import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.lib.real.RealLinearAlgebra;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Likelihood")
 class LikelihoodTest {
-    private LikelihoodRunner runner = new LikelihoodRunner();
+    private Runner<BigDecimal> runner = new Runner<>();
 
     @Test
     @DisplayName("computes likelihood")
@@ -30,7 +30,7 @@ class LikelihoodTest {
         Vector<BigDecimal> xi = new Vector<>(asList(valueOf(1.0), valueOf(2.0)));
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2)));
         BigDecimal expected = new BigDecimal(0.6224593).setScale(4, HALF_UP);
-        BigDecimal probability = runner.run(xi, beta, Likelihood::new);
+        BigDecimal probability = runner.run(new LikelihoodApplication(xi, beta));
         assertEquals(expected, probability.setScale(4, HALF_UP));
     }
 
@@ -40,7 +40,7 @@ class LikelihoodTest {
         assertThrows(IllegalArgumentException.class, () -> {
             Vector<BigDecimal> xi = new Vector<>(asList(valueOf(1.0), valueOf(2.0)));
             Vector<BigDecimal> beta = new Vector<>(Collections.singletonList(valueOf(0.1)));
-            runner.run(xi, beta, Likelihood::new);
+            runner.run(new LikelihoodApplication(xi, beta));
         });
     }
 
@@ -60,22 +60,22 @@ class LikelihoodTest {
     }
 }
 
-class LikelihoodRunner extends Runner<BigDecimal> {
-    BigDecimal run(Vector<BigDecimal> v1, Vector<BigDecimal> v2, Transformation transformation) {
-        return run(builder -> buildTransformation(v1, v2, transformation, builder));
+class LikelihoodApplication implements Application<BigDecimal, ProtocolBuilderNumeric> {
+    private Vector<BigDecimal> xi;
+    private Vector<BigDecimal> beta;
+
+    LikelihoodApplication(Vector<BigDecimal> xi, Vector<BigDecimal> beta) {
+        this.xi = xi;
+        this.beta = beta;
     }
 
-    private DRes<BigDecimal> buildTransformation(Vector<BigDecimal> v1, Vector<BigDecimal> v2, Transformation transformation, ProtocolBuilderNumeric builder) {
-        DRes<Vector<DRes<SReal>>> closedV1, closedV2;
-
+    @Override
+    public DRes<BigDecimal> buildComputation(ProtocolBuilderNumeric builder) {
+        DRes<Vector<DRes<SReal>>> closedXi, closedBeta;
         RealLinearAlgebra real = builder.realLinAlg();
-        closedV1 = real.input(v1, 1);
-        closedV2 = real.input(v2, 1);
-        DRes<SReal> closedResult = builder.seq(transformation.transform(closedV1, closedV2));
+        closedXi = real.input(xi, 1);
+        closedBeta = real.input(beta, 1);
+        DRes<SReal> closedResult = builder.seq(new Likelihood(closedXi, closedBeta));
         return builder.realNumeric().open(closedResult);
-    }
-
-    interface Transformation {
-        Computation<SReal, ProtocolBuilderNumeric> transform(DRes<Vector<DRes<SReal>>> m, DRes<Vector<DRes<SReal>>> v);
     }
 }
