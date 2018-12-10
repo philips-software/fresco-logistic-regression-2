@@ -13,7 +13,7 @@ public class Hessian implements Computation<Matrix<DRes<SReal>>, ProtocolBuilder
 
     private DRes<Matrix<DRes<SReal>>> input;
 
-    Hessian(DRes<Matrix<DRes<SReal>>> input) {
+    public Hessian(DRes<Matrix<DRes<SReal>>> input) {
         this.input = input;
     }
 
