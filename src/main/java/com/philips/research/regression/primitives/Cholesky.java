@@ -16,10 +16,10 @@ import static com.philips.research.regression.util.GenericArrayCreation.newArray
 import static java.math.BigDecimal.ZERO;
 import static java.math.BigInteger.valueOf;
 
-class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
+public class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
     private DRes<Matrix<DRes<SReal>>> input;
 
-    Cholesky(DRes<Matrix<DRes<SReal>>> input) {
+    public Cholesky(DRes<Matrix<DRes<SReal>>> input) {
         this.input = input;
     }
 
