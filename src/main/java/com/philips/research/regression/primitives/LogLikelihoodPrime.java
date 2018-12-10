@@ -16,7 +16,7 @@ public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, Prot
     private final DRes<Matrix<DRes<SReal>>> x;
     private final DRes<Vector<DRes<SReal>>> y, beta;
 
-    LogLikelihoodPrime(DRes<Matrix<DRes<SReal>>> x, DRes<Vector<DRes<SReal>>> y, DRes<Vector<DRes<SReal>>> beta) {
+    public LogLikelihoodPrime(DRes<Matrix<DRes<SReal>>> x, DRes<Vector<DRes<SReal>>> y, DRes<Vector<DRes<SReal>>> beta) {
         this.x = x;
         this.y = y;
         this.beta = beta;
