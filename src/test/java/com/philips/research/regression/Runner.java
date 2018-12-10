@@ -22,6 +22,8 @@ public class Runner {
             // strip test framework exceptions to get to the actual exception
             if (exception.getCause().getCause() instanceof RuntimeException) {
                 throw (RuntimeException) exception.getCause().getCause();
+            } else if (exception.getCause().getCause() instanceof Error) {
+                throw (Error)exception.getCause().getCause();
             } else {
                 throw exception;
             }
