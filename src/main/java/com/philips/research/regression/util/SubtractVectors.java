@@ -6,13 +6,13 @@ import dk.alexandra.fresco.lib.real.SReal;
 
 import java.util.Vector;
 
-public class AddVectors extends BinaryVectorOperation {
+public class SubtractVectors extends BinaryVectorOperation {
 
-    public AddVectors(DRes<Vector<DRes<SReal>>> left, DRes<Vector<DRes<SReal>>> right) {
+    public SubtractVectors(DRes<Vector<DRes<SReal>>> left, DRes<Vector<DRes<SReal>>> right) {
         super(left, right);
     }
 
     protected DRes<SReal> combine(ProtocolBuilderNumeric builder, DRes<SReal> left, DRes<SReal> right) {
-        return builder.realNumeric().add(left, right);
+        return builder.realNumeric().sub(left, right);
     }
 }
