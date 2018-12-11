@@ -26,7 +26,7 @@ public class MatrixConstruction {
         for (int row = 0; row< size; row++) {
             ArrayList<BigDecimal> elements = new ArrayList<>();
             for (int column = 0; column< size; column++) {
-                elements.add(row == column ? ZERO : ONE);
+                elements.add(row == column ? ONE : ZERO);
             }
             identity.add(elements);
         }
