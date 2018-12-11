@@ -35,7 +35,7 @@ class UpdateLearnedModelTest {
 
         beta = run(new UpdateLearnedModelApplication(L, beta, l));
 
-        assertEquals(asList(valueOf(33.0), valueOf(-12.0)), beta, 2);
+        assertEquals(asList(valueOf(33.0), valueOf(-12.0)), beta, 0.01);
     }
 
     private Matrix<BigDecimal> hessian(Matrix<BigDecimal> matrix) {

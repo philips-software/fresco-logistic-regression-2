@@ -37,7 +37,7 @@ class FitLogisticModelTest {
 
         List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 4), 2);
 
-        assertEquals(asList(beta_hp, beta_wt, intercept), beta, 3);
+        assertEquals(asList(beta_hp, beta_wt, intercept), beta, 0.001);
     }
 
     private static BigDecimal[] hp1 = stream(new Double[]{

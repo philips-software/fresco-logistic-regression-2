@@ -34,7 +34,7 @@ class SubstitutionTest {
         });
         Vector<BigDecimal> b  = new Vector<>(asList(valueOf(2.0), valueOf(-1.0), valueOf(4.0)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(2.0), valueOf(3.0), valueOf(-16.0)));
-        assertEquals(expected, run(new Substitution(L, b, ForwardSubstitution::new)), 3);
+        assertEquals(expected, run(new Substitution(L, b, ForwardSubstitution::new)), 0.001);
     }
 
     @Test
@@ -47,7 +47,7 @@ class SubstitutionTest {
         });
         Vector<BigDecimal> b  = new Vector<>(asList(valueOf(4.0), valueOf(-1.0), valueOf(2.0)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-24.0), valueOf(-13.0), valueOf(2.0)));
-        assertEquals(expected, run(new Substitution(L, b, BackSubstitution::new)), 3);
+        assertEquals(expected, run(new Substitution(L, b, BackSubstitution::new)), 0.001);
     }
 }
 

@@ -34,7 +34,7 @@ class LogLikelihoodPrimeTest {
         Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2), valueOf(0.3), valueOf(0.4)));
         Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-0.9134458), valueOf(-1.826892), valueOf(-2.740337), valueOf(-3.653783)));
         List<BigDecimal> result = run(new LogLikelihoodPrimeApplication(x, y, beta));
-        assertEquals(expected, result, 3);
+        assertEquals(expected, result, 0.0001);
     }
 }
 
