@@ -35,7 +35,7 @@ class FitLogisticModelTest {
         List<Matrix<BigDecimal>> Xs = asList(X1, X2);
         List<Vector<BigDecimal>> Ys = asList(am1, am2);
 
-        List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 4), 2);
+        List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 5), 2);
 
         assertEquals(asList(beta_hp, beta_wt, intercept), beta, 0.001);
     }
