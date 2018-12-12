@@ -65,12 +65,10 @@ class Substitution implements Application<List<BigDecimal>, ProtocolBuilderNumer
 
     @Override
     public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
-        DRes<Matrix<DRes<SReal>>> closedMatrix;
-        DRes<Vector<DRes<SReal>>> closedVector, closedResult;
         RealLinearAlgebra real = builder.realLinAlg();
-        closedMatrix = real.input(matrix, 1);
-        closedVector = real.input(vector, 1);
-        closedResult = builder.seq(transformation.transform(closedMatrix, closedVector));
+        DRes<Matrix<DRes<SReal>>> closedMatrix = real.input(matrix, 1);
+        DRes<Vector<DRes<SReal>>> closedVector = real.input(vector, 1);
+        DRes<Vector<DRes<SReal>>> closedResult = builder.seq(transformation.transform(closedMatrix, closedVector));
         DRes<Vector<DRes<BigDecimal>>> opened = real.openVector(closedResult);
         return () -> unwrap(opened);
     }
