@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import static com.philips.research.regression.util.GenericArrayCreation.newArray;
 import static java.math.BigDecimal.ZERO;
+import static java.util.Arrays.asList;
 
 public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> x;
@@ -42,6 +43,6 @@ public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, Prot
                     );
             }
         }
-        return () -> new Vector<>(Arrays.asList(result));
+        return () -> new Vector<>(asList(result));
     }
 }
