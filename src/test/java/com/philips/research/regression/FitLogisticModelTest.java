@@ -15,10 +15,10 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import static com.philips.research.regression.Runner.run;
-import static com.philips.research.regression.util.GenericArrayCreation.newArray;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
+import static com.philips.research.regression.util.MatrixConversions.transpose;
 import static java.math.BigDecimal.valueOf;
 import static java.util.Arrays.*;
 
@@ -88,13 +88,6 @@ class FitLogisticModelTest {
         0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
     }).map(BigDecimal::valueOf).collect(Collectors.toCollection(Vector::new));
 
-    static <T> Matrix<T> transpose(Matrix<T> matrix) {
-        T[][] transposed = newArray(matrix.getWidth());
-        for (int i=0; i<transposed.length; i++) {
-            transposed[i] = matrix.getColumn(i).toArray(newArray(matrix.getHeight()));
-        }
-        return matrix(transposed);
-    }
 }
 
 class FitLogisticModelApplication implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
