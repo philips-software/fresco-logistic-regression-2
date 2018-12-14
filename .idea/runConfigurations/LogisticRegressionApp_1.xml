@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="LogisticRegressionApp 1" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.philips.research.regression.app.LogisticRegressionApp" />
+    <module name="fresco-logistic-regression" />
+    <option name="PROGRAM_PARAMETERS" value="-i1 -p1:localhost:8871 -p2:localhost:8872" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.philips.research.regression.app.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
