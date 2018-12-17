@@ -50,7 +50,7 @@ public class CloseList implements ComputationParallel<List<DRes<SReal>>, Protoco
     private List<DRes<SReal>> buildAsReceiver(RealNumeric numeric) {
         List<DRes<SReal>> closed = new ArrayList<>();
         for (int i = 0; i < numberOfInputs; i++) {
-            closed.add(numeric.input(null, inputParty));
+            closed.add(numeric.input(new BigDecimal(0), inputParty));
         }
         return closed;
     }

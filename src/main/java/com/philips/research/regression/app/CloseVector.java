@@ -50,7 +50,7 @@ public class CloseVector implements ComputationParallel<Vector<DRes<SReal>>, Pro
     private Vector<DRes<SReal>> buildAsReceiver(RealNumeric numeric) {
         Vector<DRes<SReal>> closed = new Vector<>();
         for (int i = 0; i < numberOfInputs; i++) {
-            closed.add(numeric.input(null, inputParty));
+            closed.add(numeric.input(new BigDecimal(0), inputParty));
         }
         return closed;
     }
