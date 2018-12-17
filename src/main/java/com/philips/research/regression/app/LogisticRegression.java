@@ -3,7 +3,6 @@ package com.philips.research.regression.app;
 import com.philips.research.regression.FitLogisticModel;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
-import dk.alexandra.fresco.framework.builder.numeric.Numeric;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.util.Pair;
 import dk.alexandra.fresco.lib.collections.Matrix;
@@ -18,14 +17,14 @@ import java.util.Vector;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 
 public class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
-    private final int party;
+    private final int myId;
     private final Matrix<BigDecimal> matrix;
     private final Vector<BigDecimal> vector;
     private final double lambda;
     private final int iterations;
 
-    public LogisticRegression(int party, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations) {
-        this.party = party;
+    public LogisticRegression(int myId, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations) {
+        this.myId = myId;
         this.matrix = matrix;
         this.vector =  vector;
         this.lambda = lambda;
@@ -34,20 +33,20 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
 
     @Override
     public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
-        return builder.seq(seq -> {
-            RealLinearAlgebra linAlg = seq.realLinAlg();
-            DRes<Matrix<DRes<SReal>>> x1 = (party == 1)
-                ? linAlg.input(matrix, 1)
-                : matrixWithNulls(linAlg, matrix.getHeight(), matrix.getWidth(), 1);
-            DRes<Vector<DRes<SReal>>> y1 = (party == 1)
-                ? linAlg.input(vector, 1)
-                : vectorWithNulls(linAlg, vector.size(), 1);
-            DRes<Matrix<DRes<SReal>>> x2 = (party == 2)
-                ? linAlg.input(matrix, 2)
-                : matrixWithNulls(linAlg, matrix.getHeight(), matrix.getWidth(), 2);
-            DRes<Vector<DRes<SReal>>> y2 = (party == 2)
-                ? linAlg.input(vector, 2)
-                : vectorWithNulls(linAlg, vector.size(), 2);
+        return builder.par(par -> {
+            DRes<Matrix<DRes<SReal>>> x1, x2;
+            DRes<Vector<DRes<SReal>>> y1, y2;
+            if (myId == 1) {
+                x1 = CloseMatrix.close(par, matrix, 1);
+                y1 = CloseVector.close(par, vector, 1);
+                x2 = CloseMatrix.close(par, matrix.getHeight(), matrix.getWidth(), 2);
+                y2 = CloseVector.close(par, vector.size(), 2);
+            } else {
+                x1 = CloseMatrix.close(par, matrix.getHeight(), matrix.getWidth(), 1);
+                y1 = CloseVector.close(par, vector.size(), 1);
+                x2 = CloseMatrix.close(par, matrix, 2);
+                y2 = CloseVector.close(par, vector, 2);
+            }
 
             List<DRes<Matrix<DRes<SReal>>>> closedXs = new ArrayList<>();
             closedXs.add(x1);
@@ -57,26 +56,32 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
             closedYs.add(y1);
             closedYs.add(y2);
 
+            return () -> new Pair<>(closedXs, closedYs);
+        }).seq((seq, inputs) -> {
+            List<DRes<Matrix<DRes<SReal>>>> closedXs = inputs.getFirst();
+            List<DRes<Vector<DRes<SReal>>>> closedYs = inputs.getSecond();
+
             DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
             return () -> unwrap(opened);
         });
     }
 
-    private static DRes<Vector<DRes<SReal>>> vectorWithNulls(RealLinearAlgebra linAlg, int size, int party) {
+    private static Vector<BigDecimal> vectorWithNulls(int size) {
         Vector<BigDecimal> v = new Vector<>();
         for (int i = 0; i < size; ++i) {
             v.add(null);
         }
-        return linAlg.input(v, party);
+        return v;
     }
 
-    private static DRes<Matrix<DRes<SReal>>> matrixWithNulls(RealLinearAlgebra linAlg, int height, int width, int party) {
+    private static Matrix<BigDecimal> matrixWithNulls(int height, int width) {
         ArrayList<BigDecimal> nullRow = new ArrayList<>(width);
         for (int c = 0; c < width; ++c) {
             nullRow.add(null);
         }
         Matrix<BigDecimal> m = new Matrix<>(height, width, r -> new ArrayList<>(nullRow));
-        return linAlg.input(m, party);
+        return m;
     }
 }
+
