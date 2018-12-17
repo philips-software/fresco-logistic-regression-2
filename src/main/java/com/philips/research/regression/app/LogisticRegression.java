@@ -11,6 +11,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -68,20 +69,20 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
         });
     }
 
-    private static Vector<BigDecimal> vectorWithNulls(int size) {
-        Vector<BigDecimal> v = new Vector<>();
-        for (int i = 0; i < size; ++i) {
-            v.add(null);
-        }
-        return v;
+    private static BigDecimal[] zeros(int size) {
+        BigDecimal[] zeros = new BigDecimal[size];
+        Arrays.fill(zeros, new BigDecimal(0));
+        return zeros;
     }
 
-    private static Matrix<BigDecimal> matrixWithNulls(int height, int width) {
-        ArrayList<BigDecimal> nullRow = new ArrayList<>(width);
-        for (int c = 0; c < width; ++c) {
-            nullRow.add(null);
-        }
-        Matrix<BigDecimal> m = new Matrix<>(height, width, r -> new ArrayList<>(nullRow));
+    private static Vector<BigDecimal> vectorWithZeros(int size) {
+        BigDecimal[] zeros = zeros(size);
+        return new Vector<>(Arrays.asList(zeros));
+    }
+
+    private static Matrix<BigDecimal> matrixWithZeros(int height, int width) {
+        ArrayList<BigDecimal> zeroRow = new ArrayList<>(Arrays.asList(zeros(width)));
+        Matrix<BigDecimal> m = new Matrix<>(height, width, r -> new ArrayList<>(zeroRow));
         return m;
     }
 }
