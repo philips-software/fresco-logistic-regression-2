@@ -8,6 +8,7 @@ import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedStrategy;
+import dk.alexandra.fresco.framework.util.ModulusFinder;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
@@ -16,6 +17,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
@@ -57,6 +59,7 @@ public class LogisticRegressionApp implements Callable<Void> {
     public static void main(String args[]) {
         CommandLine.call(new LogisticRegressionApp(), args);
     }
+    protected static final BigInteger DEFAULT_MODULUS = new BigInteger("6703903964971298549787012499123814115273848577471136527425966013026501536706464354255445443244279389455058889493431223951165286470575994074291745908195329");
 
     @Override
     public Void call() {
@@ -66,7 +69,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         Vector<BigDecimal> v = myId == 1 ? CarDataSet.am1 : CarDataSet.am2;
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
-        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite();
+        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(DEFAULT_MODULUS,200,16);
         SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
             new SecureComputationEngineImpl<>(
                 protocolSuite,
