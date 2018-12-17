@@ -36,16 +36,17 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
         return builder.par(par -> {
             DRes<Matrix<DRes<SReal>>> x1, x2;
             DRes<Vector<DRes<SReal>>> y1, y2;
+            RealLinearAlgebra linAlg = par.realLinAlg();
             if (myId == 1) {
-                x1 = CloseMatrix.close(par, matrix, 1);
-                y1 = CloseVector.close(par, vector, 1);
-                x2 = CloseMatrix.close(par, matrix.getHeight(), matrix.getWidth(), 2);
-                y2 = CloseVector.close(par, vector.size(), 2);
+                x1 = linAlg.input(matrix, 1);
+                y1 = linAlg.input(vector, 1);
+                x2 = linAlg.input(matrixWithZeros(matrix.getHeight(), matrix.getWidth()), 2);
+                y2 = linAlg.input(vectorWithZeros(vector.size()), 2);
             } else {
-                x1 = CloseMatrix.close(par, matrix.getHeight(), matrix.getWidth(), 1);
-                y1 = CloseVector.close(par, vector.size(), 1);
-                x2 = CloseMatrix.close(par, matrix, 2);
-                y2 = CloseVector.close(par, vector, 2);
+                x1 = linAlg.input(matrixWithZeros(matrix.getHeight(), matrix.getWidth()), 1);
+                y1 = linAlg.input(vectorWithZeros(vector.size()), 1);
+                x2 = linAlg.input(matrix, 2);
+                y2 = linAlg.input(vector, 2);
             }
 
             List<DRes<Matrix<DRes<SReal>>>> closedXs = new ArrayList<>();
