@@ -10,6 +10,7 @@ import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
 import dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy;
+import dk.alexandra.fresco.framework.util.ModulusFinder;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
@@ -61,7 +62,6 @@ public class LogisticRegressionApp implements Callable<Void> {
     public static void main(String args[]) {
         CommandLine.call(new LogisticRegressionApp(), args);
     }
-    protected static final BigInteger DEFAULT_MODULUS = new BigInteger("6703903964971298549787012499123814115273848577471136527425966013026501536706464354255445443244279389455058889493431223951165286470575994074291745908195329");
 
     @Override
     public Void call() {
@@ -71,7 +71,8 @@ public class LogisticRegressionApp implements Callable<Void> {
         Vector<BigDecimal> v = myId == 1 ? CarDataSet.am1 : CarDataSet.am2;
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
-        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(DEFAULT_MODULUS,200,16);
+        BigInteger modulus = ModulusFinder.findSuitableModulus(512);
+        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(modulus,200,16);
         BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
         ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
         SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
@@ -81,7 +82,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         AsyncNetwork network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
         List<BigDecimal> result = sce.runApplication(
             frescoApp,
-            new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), DEFAULT_MODULUS),
+            new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), modulus),
             network);
         System.out.println(result);
         network.close();
