@@ -76,9 +76,9 @@ public class LogisticRegressionApp implements Callable<Void> {
                 new BatchedProtocolEvaluator<>(new BatchedStrategy<>(), protocolSuite));
         List<BigDecimal> result = sce.runApplication(
             frescoApp,
-            new DummyArithmeticResourcePoolImpl(myId, partyMap.size()),
             new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap)));
         System.out.print(result);
+            new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), DEFAULT_MODULUS),
         return null;
     }
 
