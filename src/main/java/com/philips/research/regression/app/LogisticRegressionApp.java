@@ -1,14 +1,15 @@
 package com.philips.research.regression.app;
 
 import dk.alexandra.fresco.framework.Party;
+import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
+import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
-import dk.alexandra.fresco.framework.sce.evaluator.BatchedStrategy;
-import dk.alexandra.fresco.framework.util.ModulusFinder;
+import dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
@@ -25,7 +26,8 @@ import java.util.concurrent.Callable;
 
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static com.philips.research.regression.util.MatrixConversions.transpose;
-import static java.util.Arrays.*;
+import static java.util.Arrays.fill;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toCollection;
 
 @CommandLine.Command(
@@ -70,15 +72,20 @@ public class LogisticRegressionApp implements Callable<Void> {
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
         DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(DEFAULT_MODULUS,200,16);
+        BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
+        ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
         SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
             new SecureComputationEngineImpl<>(
                 protocolSuite,
-                new BatchedProtocolEvaluator<>(new BatchedStrategy<>(), protocolSuite));
+                evaluator);
+        AsyncNetwork network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
         List<BigDecimal> result = sce.runApplication(
             frescoApp,
-            new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap)));
-        System.out.print(result);
             new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), DEFAULT_MODULUS),
+            network);
+        System.out.println(result);
+        network.close();
+        sce.shutdownSCE();
         return null;
     }
 
