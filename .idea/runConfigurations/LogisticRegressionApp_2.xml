@@ -3,6 +3,8 @@
     <option name="MAIN_CLASS_NAME" value="com.philips.research.regression.app.LogisticRegressionApp" />
     <module name="fresco-logistic-regression" />
     <option name="PROGRAM_PARAMETERS" value="-i2 -p1:localhost:8871 -p2:localhost:8872" />
+    <option name="REDIRECT_INPUT" value="true" />
+    <option name="INPUT_FILE" value="$PROJECT_DIR$/src/main/resources/mtcars_party2.txt" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.philips.research.regression.app.*" />

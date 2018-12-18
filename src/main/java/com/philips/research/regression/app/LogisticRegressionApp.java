@@ -5,6 +5,7 @@ import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
+import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
@@ -13,6 +14,9 @@ import dk.alexandra.fresco.framework.util.AesCtrDrbg;
 import dk.alexandra.fresco.framework.util.ModulusFinder;
 import dk.alexandra.fresco.framework.util.OpenedValueStore;
 import dk.alexandra.fresco.lib.collections.Matrix;
+import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
+import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
+import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePoolImpl;
 import dk.alexandra.fresco.suite.spdz.SpdzProtocolSuite;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
@@ -23,11 +27,10 @@ import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
@@ -69,11 +72,12 @@ public class LogisticRegressionApp implements Callable<Void> {
     }
 
     @Override
-    public Void call() {
+    public Void call() throws IOException {
         HashMap<Integer, Party> partyMap = createPartyMap();
 
-        Matrix<BigDecimal> m = myId == 1 ? X1 : X2;
-        Vector<BigDecimal> v = myId == 1 ? CarDataSet.am1 : CarDataSet.am2;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        Matrix<BigDecimal> m = readMatrix(reader);
+        Vector<BigDecimal> v = readVector(reader);
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
         BigInteger modulus = ModulusFinder.findSuitableModulus(512);
@@ -107,6 +111,44 @@ public class LogisticRegressionApp implements Callable<Void> {
         return null;
     }
 
+    private Matrix<BigDecimal> readMatrix(BufferedReader reader) throws IOException {
+        String matrixString = reader.readLine();
+        String preprocessed = matrixString.replace("]", "\n")
+                                          .replace("[", " ")
+                                          .replace(",", " ");
+        BufferedReader matrixReader = new BufferedReader(new StringReader(preprocessed));
+        ArrayList<ArrayList<BigDecimal>> rows = new ArrayList<>();
+        String line = matrixReader.readLine();
+        while (line != null && !line.isEmpty()) {
+            ArrayList<BigDecimal> row = new ArrayList<>();
+            Scanner sc = new Scanner(line);
+            sc.useLocale(Locale.US);
+            while (sc.hasNextDouble()) {
+                double d = sc.nextDouble();
+                row.add(BigDecimal.valueOf(d));
+            }
+            rows.add(row);
+            line = matrixReader.readLine();
+        }
+        return new Matrix<>(rows.size(), rows.get(0).size(), rows::get);
+    }
+
+    private Vector<BigDecimal> readVector(BufferedReader reader) throws IOException {
+        String vectorString = reader.readLine();
+        String preprocessed = vectorString
+            .replace("]", "\n")
+            .replace("[", " ")
+            .replace(",", " ");
+        BufferedReader vectorReader = new BufferedReader(new StringReader(preprocessed));
+        Vector<BigDecimal> vector = new Vector<>();
+        Scanner sc = new Scanner(preprocessed);
+        sc.useLocale(Locale.US);
+        while (sc.hasNextDouble()) {
+            vector.add(BigDecimal.valueOf(sc.nextDouble()));
+        }
+        return vector;
+    }
+
     private HashMap<Integer, Party> createPartyMap() {
         HashMap<Integer, Party> partyMap = new HashMap<>();
         for (int p = 0; p < parties.length/3; ++p) {
@@ -117,53 +159,4 @@ public class LogisticRegressionApp implements Callable<Void> {
         }
         return partyMap;
     }
-
-    private static BigDecimal[] ones;
-    static {
-        ones = new BigDecimal[CarDataSet.hp1.length];
-        fill(ones, BigDecimal.ONE);
-    }
-
-    private static Matrix<BigDecimal> X1 = transpose(matrix(new BigDecimal[][]{
-        CarDataSet.hp1,
-        CarDataSet.wt1,
-        ones
-    }));
-
-    private static Matrix<BigDecimal> X2 = transpose(matrix(new BigDecimal[][]{
-        CarDataSet.hp2,
-        CarDataSet.wt2,
-        ones
-    }));
-}
-
-class CarDataSet {
-
-    static BigDecimal[] hp1 = stream(new Double[]{
-        110.0, 110.0, 93.0, 110.0, 175.0, 105.0, 245.0, 62.0,
-        95.0, 123.0, 123.0, 180.0, 180.0, 180.0, 205.0, 215.0
-    }).map(BigDecimal::valueOf).toArray(BigDecimal[]::new);
-    static BigDecimal[] hp2 = stream(new Double[]{
-        230.0, 66.0, 52.0, 65.0, 97.0, 150.0, 150.0, 245.0,
-        175.0, 66.0, 91.0, 113.0, 264.0, 175.0, 335.0, 109.0
-    }).map(BigDecimal::valueOf).toArray(BigDecimal[]::new);
-
-    static BigDecimal[] wt1 = stream(new Double[]{
-        2.62, 2.875, 2.32, 3.215, 3.44, 3.46, 3.57, 3.19,
-        3.15, 3.44, 3.44, 4.07, 3.73, 3.78, 5.25, 5.424
-    }).map(BigDecimal::valueOf).toArray(BigDecimal[]::new);
-    static BigDecimal[] wt2 = stream(new Double[]{
-        5.345, 2.2, 1.615, 1.835, 2.465, 3.52, 3.435, 3.84,
-        3.845, 1.935, 2.14, 1.513, 3.17, 2.77, 3.57, 2.78
-    }).map(BigDecimal::valueOf).toArray(BigDecimal[]::new);
-
-    static Vector<BigDecimal> am1 = stream(new Double[]{
-        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-    }).map(BigDecimal::valueOf).collect(toCollection(Vector::new));
-
-    static Vector<BigDecimal> am2 = stream(new Double[]{
-        0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
-    }).map(BigDecimal::valueOf).collect(toCollection(Vector::new));
 }
