@@ -5,16 +5,21 @@ import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
-import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
 import dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy;
+import dk.alexandra.fresco.framework.util.AesCtrDrbg;
 import dk.alexandra.fresco.framework.util.ModulusFinder;
+import dk.alexandra.fresco.framework.util.OpenedValueStore;
 import dk.alexandra.fresco.lib.collections.Matrix;
-import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
-import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
-import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePoolImpl;
+import dk.alexandra.fresco.suite.spdz.SpdzProtocolSuite;
+import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
+import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
+import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
+import dk.alexandra.fresco.suite.spdz.storage.SpdzDataSupplier;
+import dk.alexandra.fresco.suite.spdz.storage.SpdzDummyDataSupplier;
+import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
@@ -59,7 +64,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         description="The number of iterations performed by the fitter. If omitted, the default value is ${DEFAULT-VALUE}.")
     int iterations;
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         CommandLine.call(new LogisticRegressionApp(), args);
     }
 
@@ -72,18 +77,30 @@ public class LogisticRegressionApp implements Callable<Void> {
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
         BigInteger modulus = ModulusFinder.findSuitableModulus(512);
-        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(modulus,200,16);
-        BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
-        ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
-        SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
-            new SecureComputationEngineImpl<>(
-                protocolSuite,
-                evaluator);
+
         AsyncNetwork network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
-        List<BigDecimal> result = sce.runApplication(
-            frescoApp,
-            new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), modulus),
-            network);
+
+        int noOfPlayers = partyMap.size();
+
+        SpdzProtocolSuite protocolSuite = new SpdzProtocolSuite(200, 16);
+        BatchEvaluationStrategy<SpdzResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
+        ProtocolEvaluator<SpdzResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
+        SecureComputationEngineImpl<SpdzResourcePool, ProtocolBuilderNumeric> sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
+        OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
+        SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, noOfPlayers, modulus);
+        SpdzResourcePoolImpl resourcePool = new SpdzResourcePoolImpl(myId, noOfPlayers, store, supplier, new AesCtrDrbg(new byte[32]));
+
+//        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(modulus,200,16);
+//        BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
+//        ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
+//        SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
+//            new SecureComputationEngineImpl<>(
+//                protocolSuite,
+//                evaluator);
+//        DummyArithmeticResourcePoolImpl resourcePool = new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), modulus);
+
+        List<BigDecimal> result = sce.runApplication(frescoApp, resourcePool, network);
+
         System.out.println(result);
         network.close();
         sce.shutdownSCE();
