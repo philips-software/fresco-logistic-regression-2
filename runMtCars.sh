@@ -1,6 +1,6 @@
 #!/bin/sh
 
-test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
+mvn package -DskipTests
 
 echo "Started at $(date)"
 
