@@ -38,22 +38,27 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     @Override
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
+            log(seq, "Started computation");
             int width = Xs.get(0).out().getWidth();
 
+            log(seq, "Compute hessian");
             DRes<Matrix<DRes<SReal>>> H = null;
-            for (DRes<Matrix<DRes<SReal>>> X: Xs) {
+            for (DRes<Matrix<DRes<SReal>>> X : Xs) {
                 DRes<Matrix<DRes<SReal>>> hessian = seq.seq(new Hessian(X));
                 H = H == null ? hessian : seq.realLinAlg().add(H, hessian);
             }
 
+            log(seq, "Cholesky");
             Matrix<BigDecimal> I = identity(width);
             H = seq.realLinAlg().sub(H, scale(lambda, I));
             DRes<Matrix<DRes<SReal>>> L = seq.seq(new Cholesky(seq.realLinAlg().scale(valueOf(-1), H)));
 
             DRes<Vector<DRes<SReal>>> beta = seq.realLinAlg().input(new Vector<>(nCopies(width, valueOf(0))), 1);
             for (int i=0; i<numberOfIterations; i++) {
+                log(seq, "Iteration " + i);
                 DRes<Vector<DRes<SReal>>> lprime = null;
                 for (int party=1; party<=Xs.size(); party++) {
+                    log(seq, "    logLikelihoodPrime " + party);
                     DRes<Matrix<DRes<SReal>>> X = Xs.get(party - 1);
                     DRes<Vector<DRes<SReal>>> Y = Ys.get(party - 1);
                     DRes<Vector<DRes<SReal>>> logLikelihoodPrime = seq.seq(new LogLikelihoodPrime(X, Y, beta));
@@ -65,11 +70,18 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 }
 
                 lprime = seq.seq(new SubtractVectors(lprime, seq.seq(new ScaleVector(valueOf(lambda), beta))));
+                log(seq, "Update learned model");
                 beta = seq.seq(new UpdateLearnedModel(L, beta, lprime));
             }
 
+            log(seq, "Finished computation");
+
             return beta;
         });
+    }
+
+    private void log(ProtocolBuilderNumeric builder, String msg) {
+        builder.seq(new TimestampedMarker(msg));
     }
 
     private static Matrix<BigDecimal> scale(double factor, Matrix<BigDecimal> matrix) {
