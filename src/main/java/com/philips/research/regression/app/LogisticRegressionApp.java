@@ -5,6 +5,7 @@ import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
+import dk.alexandra.fresco.framework.network.Network;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
@@ -14,6 +15,9 @@ import dk.alexandra.fresco.framework.util.AesCtrDrbg;
 import dk.alexandra.fresco.framework.util.ModulusFinder;
 import dk.alexandra.fresco.framework.util.OpenedValueStore;
 import dk.alexandra.fresco.lib.collections.Matrix;
+import dk.alexandra.fresco.logging.BatchEvaluationLoggingDecorator;
+import dk.alexandra.fresco.logging.EvaluatorLoggingDecorator;
+import dk.alexandra.fresco.logging.NetworkLoggingDecorator;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
 import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePoolImpl;
@@ -24,6 +28,7 @@ import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDummyDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
@@ -82,13 +87,16 @@ public class LogisticRegressionApp implements Callable<Void> {
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
         BigInteger modulus = ModulusFinder.findSuitableModulus(512);
 
-        AsyncNetwork network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
+        Network network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
+        network = new NetworkLoggingDecorator(network);
 
         int noOfPlayers = partyMap.size();
 
         SpdzProtocolSuite protocolSuite = new SpdzProtocolSuite(200, 16);
         BatchEvaluationStrategy<SpdzResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
+        strategy = new BatchEvaluationLoggingDecorator<>(strategy);
         ProtocolEvaluator<SpdzResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
+        evaluator = new EvaluatorLoggingDecorator<>(evaluator);
         SecureComputationEngineImpl<SpdzResourcePool, ProtocolBuilderNumeric> sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
         OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
         SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, noOfPlayers, modulus);
@@ -106,7 +114,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         List<BigDecimal> result = sce.runApplication(frescoApp, resourcePool, network);
 
         System.out.println(result);
-        network.close();
+        ((Closeable)network).close();
         sce.shutdownSCE();
         return null;
     }
