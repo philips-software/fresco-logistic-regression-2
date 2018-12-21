@@ -7,8 +7,8 @@ echo "Started at $(date)"
 main() {
     out1File=$(mktemp)
     out2File=$(mktemp)
-    java -jar target/logistic-regression-jar-with-dependencies.jar -i1 -p1:localhost:8871 -p2:localhost:8872 < target/classes/mtcars_party1.txt > ${out1File} &
-    java -jar target/logistic-regression-jar-with-dependencies.jar -i2 -p1:localhost:8871 -p2:localhost:8872 < target/classes/mtcars_party2.txt > ${out2File} &
+    java -jar target/logistic-regression-jar-with-dependencies.jar -i1 -p1:localhost:8871 -p2:localhost:8872 < target/classes/mtcars_party1.txt > ${out1File} 2> party1.log &
+    java -jar target/logistic-regression-jar-with-dependencies.jar -i2 -p1:localhost:8871 -p2:localhost:8872 < target/classes/mtcars_party2.txt > ${out2File} 2> party2.log &
     wait
 
     out1=$(cat ${out1File})
