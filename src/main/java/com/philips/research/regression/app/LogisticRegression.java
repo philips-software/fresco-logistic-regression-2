@@ -24,7 +24,7 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
     private final double lambda;
     private final int iterations;
 
-    public LogisticRegression(int myId, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations) {
+    LogisticRegression(int myId, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations) {
         this.myId = myId;
         this.matrix = matrix;
         this.vector =  vector;
@@ -82,8 +82,7 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
 
     private static Matrix<BigDecimal> matrixWithZeros(int height, int width) {
         ArrayList<BigDecimal> zeroRow = new ArrayList<>(Arrays.asList(zeros(width)));
-        Matrix<BigDecimal> m = new Matrix<>(height, width, r -> new ArrayList<>(zeroRow));
-        return m;
+        return new Matrix<>(height, width, r -> new ArrayList<>(zeroRow));
     }
 }
 
