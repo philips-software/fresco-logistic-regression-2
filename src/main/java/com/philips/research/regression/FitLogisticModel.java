@@ -52,6 +52,29 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
 
             DRes<Vector<DRes<SReal>>> beta = seq.realLinAlg().input(new Vector<>(nCopies(width, valueOf(0))), 1);
             for (int i=0; i<numberOfIterations; i++) {
+                beta = seq.seq(new SingleIteration(beta, L));
+            }
+
+            return beta;
+        });
+    }
+
+    private static Matrix<BigDecimal> scale(double factor, Matrix<BigDecimal> matrix) {
+        return map(matrix, valueOf(factor)::multiply);
+    }
+
+    private class SingleIteration implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
+        private DRes<Vector<DRes<SReal>>> beta;
+        private DRes<Matrix<DRes<SReal>>> L;
+
+        private SingleIteration(DRes<Vector<DRes<SReal>>> initialBeta, DRes<Matrix<DRes<SReal>>> L) {
+            this.beta = initialBeta;
+            this.L = L;
+        }
+
+        @Override
+        public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
+            return builder.seq(seq -> {
                 DRes<Vector<DRes<SReal>>> lprime = null;
                 for (int party=1; party<=Xs.size(); party++) {
                     DRes<Matrix<DRes<SReal>>> X = Xs.get(party - 1);
@@ -65,15 +88,9 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 }
 
                 lprime = seq.seq(new SubtractVectors(lprime, seq.seq(new ScaleVector(valueOf(lambda), beta))));
-                beta = seq.seq(new UpdateLearnedModel(L, beta, lprime));
-            }
-
-            return beta;
-        });
-    }
-
-    private static Matrix<BigDecimal> scale(double factor, Matrix<BigDecimal> matrix) {
-        return map(matrix, valueOf(factor)::multiply);
+                return seq.seq(new UpdateLearnedModel(L, beta, lprime));
+            });
+        }
     }
 }
 
