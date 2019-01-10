@@ -40,16 +40,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         return builder.seq(seq -> {
             int width = Xs.get(0).out().getWidth();
 
-            DRes<Matrix<DRes<SReal>>> H = null;
-            for (DRes<Matrix<DRes<SReal>>> X: Xs) {
-                DRes<Matrix<DRes<SReal>>> hessian = seq.seq(new Hessian(X));
-                H = H == null ? hessian : seq.realLinAlg().add(H, hessian);
-            }
-
-            Matrix<BigDecimal> I = identity(width);
-            H = seq.realLinAlg().sub(H, scale(lambda, I));
-            DRes<Matrix<DRes<SReal>>> L = seq.seq(new Cholesky(seq.realLinAlg().scale(valueOf(-1), H)));
-
+            DRes<Matrix<DRes<SReal>>> L = seq.seq(new CholeskyDecompositionOfHessian());
             DRes<Vector<DRes<SReal>>> beta = seq.realLinAlg().input(new Vector<>(nCopies(width, valueOf(0))), 1);
             for (int i=0; i<numberOfIterations; i++) {
                 beta = seq.seq(new SingleIteration(beta, L));
@@ -61,6 +52,26 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
 
     private static Matrix<BigDecimal> scale(double factor, Matrix<BigDecimal> matrix) {
         return map(matrix, valueOf(factor)::multiply);
+    }
+
+    private class CholeskyDecompositionOfHessian implements Computation<Matrix<DRes<SReal>>, ProtocolBuilderNumeric> {
+
+        @Override
+        public DRes<Matrix<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
+            return builder.seq(seq -> {
+                int width = Xs.get(0).out().getWidth();
+
+                DRes<Matrix<DRes<SReal>>> H = null;
+                for (DRes<Matrix<DRes<SReal>>> X: Xs) {
+                    DRes<Matrix<DRes<SReal>>> hessian = seq.seq(new Hessian(X));
+                    H = H == null ? hessian : seq.realLinAlg().add(H, hessian);
+                }
+
+                Matrix<BigDecimal> I = identity(width);
+                H = seq.realLinAlg().sub(H, scale(lambda, I));
+                return seq.seq(new Cholesky(seq.realLinAlg().scale(valueOf(-1), H)));
+            });
+        }
     }
 
     private class SingleIteration implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
