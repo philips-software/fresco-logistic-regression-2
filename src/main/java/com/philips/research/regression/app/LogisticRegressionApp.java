@@ -6,7 +6,6 @@ import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
 import dk.alexandra.fresco.framework.network.Network;
-import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
@@ -18,9 +17,6 @@ import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.logging.BatchEvaluationLoggingDecorator;
 import dk.alexandra.fresco.logging.EvaluatorLoggingDecorator;
 import dk.alexandra.fresco.logging.NetworkLoggingDecorator;
-import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
-import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
-import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePoolImpl;
 import dk.alexandra.fresco.suite.spdz.SpdzProtocolSuite;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
@@ -37,12 +33,6 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import static com.philips.research.regression.util.MatrixConstruction.matrix;
-import static com.philips.research.regression.util.MatrixConversions.transpose;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toCollection;
-
 @CommandLine.Command(
     description = "Secure Multi-Party Logistic Regression",
     name="LogisticRegression",
@@ -53,23 +43,23 @@ public class LogisticRegressionApp implements Callable<Void> {
         names={"-i", "--myId"},
         required=true,
         description="Id of this party.")
-    int myId;
+    private int myId;
     @Option(
         names = {"-p", "--party"},
         required = true,
         split=":",
         description = "Specification of a party. One of these needs to be present for each party. For example: '-p1:localhost:8871 -p2:localhost:8872'.")
-    String[] parties;
+    private String[] parties;
     @Option(
         names={"--lambda"},
         defaultValue="1.0",
         description="Lambda for fitting the logistic model. If omitted, the default value is ${DEFAULT-VALUE}.")
-    double lambda;
+    private double lambda;
     @Option(
         names={"--iterations"},
         defaultValue="5",
         description="The number of iterations performed by the fitter. If omitted, the default value is ${DEFAULT-VALUE}.")
-    int iterations;
+    private int iterations;
 
     public static void main(String[] args) {
         CommandLine.call(new LogisticRegressionApp(), args);
@@ -100,15 +90,6 @@ public class LogisticRegressionApp implements Callable<Void> {
         OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
         SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, noOfPlayers, modulus);
         SpdzResourcePoolImpl resourcePool = new SpdzResourcePoolImpl(myId, noOfPlayers, store, supplier, new AesCtrDrbg(new byte[32]));
-
-//        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(modulus,200,16);
-//        BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
-//        ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
-//        SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
-//            new SecureComputationEngineImpl<>(
-//                protocolSuite,
-//                evaluator);
-//        DummyArithmeticResourcePoolImpl resourcePool = new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), modulus);
 
         List<BigDecimal> result = sce.runApplication(frescoApp, resourcePool, network);
 
@@ -146,7 +127,6 @@ public class LogisticRegressionApp implements Callable<Void> {
             .replace("]", "\n")
             .replace("[", " ")
             .replace(",", " ");
-        BufferedReader vectorReader = new BufferedReader(new StringReader(preprocessed));
         Vector<BigDecimal> vector = new Vector<>();
         Scanner sc = new Scanner(preprocessed);
         sc.useLocale(Locale.US);
