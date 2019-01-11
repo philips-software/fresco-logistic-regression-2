@@ -37,19 +37,30 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
 
     @Override
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
+        class LoopState {
+            private int i;
+            private DRes<Matrix<DRes<SReal>>> L;
+            private DRes<Vector<DRes<SReal>>> beta;
+
+            private LoopState(int i, DRes<Matrix<DRes<SReal>>> L, DRes<Vector<DRes<SReal>>> beta) {
+                this.i = i;
+                this.L = L;
+                this.beta = beta;
+            }
+        }
+
         return builder.seq(seq -> {
             log(seq, "Started computation");
             int width = Xs.get(0).out().getWidth();
 
             DRes<Matrix<DRes<SReal>>> L = seq.seq(new CholeskyDecompositionOfHessian());
             DRes<Vector<DRes<SReal>>> beta = seq.realLinAlg().input(new Vector<>(nCopies(width, valueOf(0))), 1);
-            for (int i=0; i<numberOfIterations; i++) {
-                log(seq, "Iteration " + i);
-                beta = seq.seq(new SingleIteration(beta, L));
-            }
-
-            return beta;
-        });
+            return () -> new LoopState(0, L, beta);
+        }).whileLoop(loopState -> loopState.i < numberOfIterations, (seq, loopState) -> {
+            log(seq, "Iteration " + loopState.i);
+            DRes<Vector<DRes<SReal>>> newBeta = seq.seq(new SingleIteration(loopState.beta, loopState.L));
+            return () -> new LoopState(loopState.i + 1, loopState.L, newBeta);
+        }).seq((seq, loopState) -> loopState.beta);
     }
 
     private static Matrix<BigDecimal> scale(double factor, Matrix<BigDecimal> matrix) {
