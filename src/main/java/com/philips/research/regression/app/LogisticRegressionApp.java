@@ -6,6 +6,7 @@ import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
 import dk.alexandra.fresco.framework.network.Network;
+import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
@@ -17,6 +18,9 @@ import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.logging.BatchEvaluationLoggingDecorator;
 import dk.alexandra.fresco.logging.EvaluatorLoggingDecorator;
 import dk.alexandra.fresco.logging.NetworkLoggingDecorator;
+import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticProtocolSuite;
+import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
+import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePoolImpl;
 import dk.alexandra.fresco.suite.spdz.SpdzProtocolSuite;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
@@ -90,6 +94,15 @@ public class LogisticRegressionApp implements Callable<Void> {
         OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
         SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, noOfPlayers, modulus);
         SpdzResourcePoolImpl resourcePool = new SpdzResourcePoolImpl(myId, noOfPlayers, store, supplier, new AesCtrDrbg(new byte[32]));
+
+//        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(modulus,200,16);
+//        BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
+//        ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
+//        SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce =
+//            new SecureComputationEngineImpl<>(
+//                protocolSuite,
+//                evaluator);
+//        DummyArithmeticResourcePoolImpl resourcePool = new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), modulus);
 
         List<BigDecimal> result = sce.runApplication(frescoApp, resourcePool, network);
 
