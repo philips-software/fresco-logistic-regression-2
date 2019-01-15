@@ -11,11 +11,12 @@ import dk.alexandra.fresco.lib.real.SReal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
 import static com.philips.research.regression.util.ListConversions.unwrap;
+import static com.philips.research.regression.util.MatrixConstruction.matrixWithZeros;
+import static com.philips.research.regression.util.VectorUtils.vectorWithZeros;
 
 public class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
     private final int myId;
@@ -69,20 +70,5 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
         });
     }
 
-    private static BigDecimal[] zeros(int size) {
-        BigDecimal[] zeros = new BigDecimal[size];
-        Arrays.fill(zeros, new BigDecimal(0));
-        return zeros;
-    }
-
-    private static Vector<BigDecimal> vectorWithZeros(int size) {
-        BigDecimal[] zeros = zeros(size);
-        return new Vector<>(Arrays.asList(zeros));
-    }
-
-    private static Matrix<BigDecimal> matrixWithZeros(int height, int width) {
-        ArrayList<BigDecimal> zeroRow = new ArrayList<>(Arrays.asList(zeros(width)));
-        return new Matrix<>(height, width, r -> new ArrayList<>(zeroRow));
-    }
 }
 

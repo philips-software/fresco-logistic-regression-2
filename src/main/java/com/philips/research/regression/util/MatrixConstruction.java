@@ -33,4 +33,9 @@ public class MatrixConstruction {
         }
         return new Matrix<>(size, size, identity);
     }
+
+    public static Matrix<BigDecimal> matrixWithZeros(int height, int width) {
+        ArrayList<BigDecimal> zeroRow = new ArrayList<>(asList(BigDecimalUtils.zeros(width)));
+        return new Matrix<>(height, width, r -> new ArrayList<>(zeroRow));
+    }
 }
