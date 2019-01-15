@@ -6,7 +6,7 @@ import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TimestampedMarker implements Computation<Void, ProtocolBuilderNumeric> {
+class TimestampedMarker implements Computation<Void, ProtocolBuilderNumeric> {
 
     private static final Logger logger = LoggerFactory.getLogger(TimestampedMarker.class);
     private final String message;
