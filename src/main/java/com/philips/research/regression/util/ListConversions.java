@@ -19,7 +19,7 @@ public class ListConversions {
         return list.out().stream().map(DRes::out).collect(Collectors.toCollection(Vector::new));
     }
 
-    public interface ElementConversion<T,U> {
+    interface ElementConversion<T,U> {
         U convert(T value);
     }
 }

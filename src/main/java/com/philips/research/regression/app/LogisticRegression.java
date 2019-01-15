@@ -18,7 +18,7 @@ import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrixWithZeros;
 import static com.philips.research.regression.util.VectorUtils.vectorWithZeros;
 
-public class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
+class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
     private final int myId;
     private final Matrix<BigDecimal> matrix;
     private final Vector<BigDecimal> vector;

@@ -13,7 +13,7 @@ import static com.philips.research.regression.util.GenericArrayCreation.newArray
 import static java.math.BigDecimal.ZERO;
 import static java.util.Arrays.asList;
 
-public class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
+class LogLikelihoodPrime implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> x;
     private final DRes<Vector<DRes<SReal>>> y, beta;
 
