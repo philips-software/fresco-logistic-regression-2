@@ -11,7 +11,6 @@ import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
 import static com.philips.research.regression.util.MatrixAssert.assertEquals;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static java.lang.Math.sqrt;
-import static java.math.BigDecimal.valueOf;
 
 @DisplayName("Cholesky decomposition")
 class CholeskyTest {

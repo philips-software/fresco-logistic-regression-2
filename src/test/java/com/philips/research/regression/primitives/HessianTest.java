@@ -10,7 +10,6 @@ import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
 import static com.philips.research.regression.util.MatrixAssert.assertEquals;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
-import static java.math.BigDecimal.valueOf;
 
 @DisplayName("Hessian matrix")
 class HessianTest {

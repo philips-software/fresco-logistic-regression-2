@@ -1,20 +1,13 @@
 package com.philips.research.regression.primitives;
 
 import com.philips.research.regression.util.VectorUtils;
-import dk.alexandra.fresco.framework.DRes;
-import dk.alexandra.fresco.framework.builder.Computation;
-import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.collections.Matrix;
-import dk.alexandra.fresco.lib.real.SReal;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 public class LocalLogLikelihoodPrime {
     private final Matrix<BigDecimal> x;
