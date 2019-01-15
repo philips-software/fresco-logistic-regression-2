@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
-public class Likelihood implements Computation<SReal, ProtocolBuilderNumeric> {
+class Likelihood implements Computation<SReal, ProtocolBuilderNumeric> {
     private final DRes<Vector<DRes<SReal>>> xi;
     private final DRes<Vector<DRes<SReal>>> beta;
 

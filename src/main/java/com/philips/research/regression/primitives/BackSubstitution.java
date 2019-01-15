@@ -11,7 +11,7 @@ import java.util.Vector;
 
 import static com.philips.research.regression.util.GenericArrayCreation.newArray;
 
-public class BackSubstitution implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
+class BackSubstitution implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> matrix;
     private final DRes<Vector<DRes<SReal>>> vector;
 

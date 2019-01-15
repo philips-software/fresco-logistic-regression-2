@@ -12,7 +12,7 @@ abstract class BinaryVectorOperation implements Computation<Vector<DRes<SReal>>,
     private final DRes<Vector<DRes<SReal>>> left;
     private final DRes<Vector<DRes<SReal>>> right;
 
-    public BinaryVectorOperation(DRes<Vector<DRes<SReal>>> left, DRes<Vector<DRes<SReal>>> right) {
+    BinaryVectorOperation(DRes<Vector<DRes<SReal>>> left, DRes<Vector<DRes<SReal>>> right) {
         this.left = left;
         this.right = right;
     }
