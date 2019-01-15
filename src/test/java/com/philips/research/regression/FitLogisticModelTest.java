@@ -47,17 +47,8 @@ class FitLogisticModelTest {
         fill(ones, BigDecimal.ONE);
     }
 
-    private static Matrix<BigDecimal> X1 = transpose(matrix(new BigDecimal[][]{
-        hp1,
-        wt1,
-        ones
-    }));
-
-    private static Matrix<BigDecimal> X2 = transpose(matrix(new BigDecimal[][]{
-        hp2,
-        wt2,
-        ones
-    }));
+    private static Matrix<BigDecimal> X1 = transpose(matrix(hp1, wt1, ones));
+    private static Matrix<BigDecimal> X2 = transpose(matrix(hp2, wt2, ones));
 
 }
 
