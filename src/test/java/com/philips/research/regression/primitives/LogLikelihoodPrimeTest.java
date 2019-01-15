@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Vector;
 
 import static com.philips.research.regression.Runner.run;
+import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
+import static com.philips.research.regression.util.BigDecimalUtils.vectorOf;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
@@ -26,13 +28,12 @@ class LogLikelihoodPrimeTest {
     @Test
     @DisplayName("calculates log(likelihood')")
     void logLikelihoodPrime() {
-        Matrix<BigDecimal> x = matrix(new BigDecimal[][]{
-            {valueOf(1.0), valueOf(2.0), valueOf(3.0), valueOf(4.0)},
-            {valueOf(1.1), valueOf(2.2), valueOf(3.3), valueOf(4.4)}
-        });
-        Vector<BigDecimal> y = new Vector<>(asList(valueOf(0.0), valueOf(1.0)));
-        Vector<BigDecimal> beta = new Vector<>(asList(valueOf(0.1), valueOf(0.2), valueOf(0.3), valueOf(0.4)));
-        Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-0.9134458), valueOf(-1.826892), valueOf(-2.740337), valueOf(-3.653783)));
+        Matrix<BigDecimal> x = matrix(
+            arrayOf(1.0, 2.0, 3.0, 4.0),
+            arrayOf(1.1, 2.2, 3.3, 4.4));
+        Vector<BigDecimal> y = vectorOf(0.0, 1.0);
+        Vector<BigDecimal> beta = vectorOf(0.1, 0.2, 0.3, 0.4);
+        Vector<BigDecimal> expected = vectorOf(-0.9134458, -1.826892, -2.740337, -3.653783);
         List<BigDecimal> result = run(new LogLikelihoodPrimeApplication(x, y, beta));
         assertEquals(expected, result, 0.0001);
     }

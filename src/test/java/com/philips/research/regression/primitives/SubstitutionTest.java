@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Vector;
 
 import static com.philips.research.regression.Runner.run;
+import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
+import static com.philips.research.regression.util.BigDecimalUtils.vectorOf;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
@@ -27,26 +29,24 @@ class SubstitutionTest {
     @Test
     @DisplayName("performs forward substitution")
     void forwardSubstitution() {
-        Matrix<BigDecimal> L = matrix(new BigDecimal[][]{
-            {valueOf(1.0), valueOf(0.0), valueOf(0.0)},
-            {valueOf(-2.0), valueOf(1.0), valueOf(0.0)},
-            {valueOf(1.0), valueOf(6.0), valueOf(1.0)}
-        });
-        Vector<BigDecimal> b  = new Vector<>(asList(valueOf(2.0), valueOf(-1.0), valueOf(4.0)));
-        Vector<BigDecimal> expected = new Vector<>(asList(valueOf(2.0), valueOf(3.0), valueOf(-16.0)));
+        Matrix<BigDecimal> L = matrix(
+            arrayOf( 1.0, 0.0, 0.0),
+            arrayOf(-2.0, 1.0, 0.0),
+            arrayOf( 1.0, 6.0, 1.0));
+        Vector<BigDecimal> b  = vectorOf(2.0, -1.0, 4.0);
+        Vector<BigDecimal> expected = vectorOf(2.0, 3.0, -16.0);
         assertEquals(expected, run(new Substitution(L, b, ForwardSubstitution::new)), 0.001);
     }
 
     @Test
     @DisplayName("performs back substitution")
     void backSubstitution() {
-        Matrix<BigDecimal> L = matrix(new BigDecimal[][]{
-            {valueOf(1.0), valueOf(-2.0), valueOf(1.0)},
-            {valueOf(0.0), valueOf(1.0), valueOf(6.0)},
-            {valueOf(0.0), valueOf(0.0), valueOf(1.0)}
-        });
-        Vector<BigDecimal> b  = new Vector<>(asList(valueOf(4.0), valueOf(-1.0), valueOf(2.0)));
-        Vector<BigDecimal> expected = new Vector<>(asList(valueOf(-24.0), valueOf(-13.0), valueOf(2.0)));
+        Matrix<BigDecimal> L = matrix(
+            arrayOf(1.0, -2.0, 1.0),
+            arrayOf(0.0,  1.0, 6.0),
+            arrayOf(0.0,  0.0, 1.0));
+        Vector<BigDecimal> b  = vectorOf(4.0, -1.0, 2.0);
+        Vector<BigDecimal> expected = vectorOf(-24.0, -13.0, 2.0);
         assertEquals(expected, run(new Substitution(L, b, BackSubstitution::new)), 0.001);
     }
 }

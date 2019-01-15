@@ -10,7 +10,8 @@ import static java.math.BigDecimal.ZERO;
 import static java.util.Arrays.asList;
 
 public class MatrixConstruction {
-    public static <T> Matrix<T> matrix(T[][] matrix) {
+    @SafeVarargs
+    public static <T> Matrix<T> matrix(T[]... matrix) {
         int width = 0;
         ArrayList<ArrayList<T>> result = new ArrayList<>();
         for (T[] row: matrix) {

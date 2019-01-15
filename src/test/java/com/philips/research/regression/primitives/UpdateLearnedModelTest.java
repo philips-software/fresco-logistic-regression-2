@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.Vector;
 
 import static com.philips.research.regression.Runner.run;
+import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
@@ -24,10 +25,9 @@ class UpdateLearnedModelTest {
     @Test
     @DisplayName("updates learned model using previous value and first derivative")
     void updatesLearnedModel() {
-        Matrix<BigDecimal> X = matrix(new BigDecimal[][]{
-            {valueOf(1.0), valueOf(2.0)},
-            {valueOf(3.0), valueOf(4.0)}
-        });
+        Matrix<BigDecimal> X = matrix(
+            arrayOf(1.0, 2.0),
+            arrayOf(3.0, 4.0));
         Matrix<BigDecimal> H = hessian(X);
         Matrix<BigDecimal> L = choleskyDecomposition(negate(H));
         Vector<BigDecimal> l = new Vector<>(asList(valueOf(7.0), valueOf(8.0)));
