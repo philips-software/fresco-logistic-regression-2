@@ -64,7 +64,7 @@ public class LogisticRegression implements Application<List<BigDecimal>, Protoco
             List<DRes<Matrix<DRes<SReal>>>> closedXs = inputs.getFirst();
             List<DRes<Vector<DRes<SReal>>>> closedYs = inputs.getSecond();
 
-            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations));
+            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations, matrix, vector));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
             return () -> unwrap(opened);
         });

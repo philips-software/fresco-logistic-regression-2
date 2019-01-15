@@ -84,7 +84,10 @@ class FitLogisticModelApplication implements Application<List<BigDecimal>, Proto
                 closedYs.add(closedY);
             }
 
-            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, numberOfIterations));
+            Matrix<BigDecimal> myX = Xs.get(seq.getBasicNumericContext().getMyId() - 1);
+            Vector<BigDecimal> myY = Ys.get(seq.getBasicNumericContext().getMyId() - 1);
+
+            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, numberOfIterations, myX, myY));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
 
             return () -> unwrap(opened);
