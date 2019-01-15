@@ -2,11 +2,12 @@ package com.philips.research.regression;
 
 import com.philips.research.regression.primitives.Cholesky;
 import com.philips.research.regression.primitives.Hessian;
-import com.philips.research.regression.primitives.LogLikelihoodPrime;
+import com.philips.research.regression.primitives.LocalLogLikelihoodPrime;
 import com.philips.research.regression.primitives.UpdateLearnedModel;
 import com.philips.research.regression.util.AddVectors;
 import com.philips.research.regression.util.ScaleVector;
 import com.philips.research.regression.util.SubtractVectors;
+import com.philips.research.regression.util.VectorUtils;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
+import static com.philips.research.regression.util.ListConversions.unwrapVector;
 import static com.philips.research.regression.util.MatrixConstruction.identity;
 import static com.philips.research.regression.util.MatrixConversions.map;
 import static java.math.BigDecimal.valueOf;
@@ -27,12 +29,18 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     private final List<DRes<Vector<DRes<SReal>>>> Ys;
     private final double lambda;
     private final int numberOfIterations;
+    private final Matrix<BigDecimal> myX;
+    private final Vector<BigDecimal> myY;
 
-    public FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs, List<DRes<Vector<DRes<SReal>>>> Ys, double lambda, int numberOfIterations) {
+    public FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs, List<DRes<Vector<DRes<SReal>>>> Ys,
+                            double lambda, int numberOfIterations,
+                            Matrix<BigDecimal> myX, Vector<BigDecimal> myY) {
         this.Xs = Xs;
         this.Ys = Ys;
         this.lambda = lambda;
         this.numberOfIterations = numberOfIterations;
+        this.myX = myX;
+        this.myY = myY;
     }
 
     @Override
@@ -43,7 +51,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
             DRes<Matrix<DRes<SReal>>> L = seq.seq(new CholeskyDecompositionOfHessian());
             DRes<Vector<DRes<SReal>>> beta = seq.realLinAlg().input(new Vector<>(nCopies(width, valueOf(0))), 1);
             for (int i=0; i<numberOfIterations; i++) {
-                beta = seq.seq(new SingleIteration(beta, L));
+                beta = seq.seq(new SingleIteration(beta, L, myX, myY));
             }
 
             return beta;
@@ -75,22 +83,37 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     }
 
     private class SingleIteration implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
-        private DRes<Vector<DRes<SReal>>> beta;
-        private DRes<Matrix<DRes<SReal>>> L;
+        private final DRes<Vector<DRes<SReal>>> beta;
+        private final DRes<Matrix<DRes<SReal>>> L;
+        private final Matrix<BigDecimal> myX;
+        private final Vector<BigDecimal> myY;
 
-        private SingleIteration(DRes<Vector<DRes<SReal>>> initialBeta, DRes<Matrix<DRes<SReal>>> L) {
+        private SingleIteration(DRes<Vector<DRes<SReal>>> initialBeta, DRes<Matrix<DRes<SReal>>> L,
+                                Matrix<BigDecimal> myX, Vector<BigDecimal> myY) {
             this.beta = initialBeta;
             this.L = L;
+            this.myX = myX;
+            this.myY = myY;
         }
 
         @Override
         public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
             return builder.seq(seq -> {
+                DRes<Vector<DRes<BigDecimal>>> openBeta = seq.realLinAlg().openVector(beta);
+                return () -> openBeta;
+            }).seq((seq, openBeta) -> {
                 DRes<Vector<DRes<SReal>>> lprime = null;
                 for (int party=1; party<=Xs.size(); party++) {
                     DRes<Matrix<DRes<SReal>>> X = Xs.get(party - 1);
                     DRes<Vector<DRes<SReal>>> Y = Ys.get(party - 1);
-                    DRes<Vector<DRes<SReal>>> logLikelihoodPrime = seq.seq(new LogLikelihoodPrime(X, Y, beta));
+                    DRes<Vector<DRes<SReal>>> logLikelihoodPrime;
+                    if (party == builder.getBasicNumericContext().getMyId()) {
+                        Vector<BigDecimal> localLogLikelihoodPrime = new LocalLogLikelihoodPrime(myX, myY, unwrapVector(openBeta)).compute();
+                        logLikelihoodPrime = seq.realLinAlg().input(localLogLikelihoodPrime, party);
+                    } else {
+                        Vector<BigDecimal> dummyVector = VectorUtils.vectorWithZeros(beta.out().size());
+                        logLikelihoodPrime = seq.realLinAlg().input(dummyVector, party);
+                    }
                     if (lprime == null) {
                         lprime = logLikelihoodPrime;
                     } else {
