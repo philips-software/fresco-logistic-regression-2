@@ -3,7 +3,6 @@ package com.philips.research.regression.util;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 public class BigDecimalUtils {
@@ -15,7 +14,9 @@ public class BigDecimalUtils {
         return Arrays.stream(doubles).mapToObj(BigDecimal::valueOf).collect(Collectors.toList());
     }
 
-    public static Vector<BigDecimal> vectorOf(double... doubles) {
-        return new Vector<>(listOf(doubles));
+    static BigDecimal[] zeros(int size) {
+        BigDecimal[] zeros = new BigDecimal[size];
+        Arrays.fill(zeros, new BigDecimal(0));
+        return zeros;
     }
 }

@@ -16,12 +16,10 @@ import java.util.Vector;
 
 import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
-import static com.philips.research.regression.util.BigDecimalUtils.vectorOf;
+import static com.philips.research.regression.util.VectorUtils.vectorOf;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
-import static java.math.BigDecimal.valueOf;
-import static java.util.Arrays.asList;
 
 @DisplayName("Forward and Backward Substitution")
 class SubstitutionTest {

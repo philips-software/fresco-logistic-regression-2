@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Vector;
 
-import static com.philips.research.regression.util.BigDecimalUtils.vectorOf;
+import static com.philips.research.regression.util.VectorUtils.vectorOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VectorUtilsTest {

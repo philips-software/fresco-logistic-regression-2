@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Vector;
 
 import static com.philips.research.regression.util.BigDecimalUtils.arrayOf;
-import static com.philips.research.regression.util.BigDecimalUtils.vectorOf;
+import static com.philips.research.regression.util.VectorUtils.vectorOf;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
