@@ -10,7 +10,7 @@ import static com.philips.research.regression.util.MatrixConversions.map;
 import static java.math.RoundingMode.HALF_UP;
 
 public class MatrixAssert {
-    private static <T> void assertEquals(Matrix<T> expected, Matrix<T> actual) {
+    public static <T> void assertEquals(Matrix<T> expected, Matrix<T> actual) {
         Assert.assertEquals(
             new MatrixWithEquality<>(expected),
             new MatrixWithEquality<>(actual)
