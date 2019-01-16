@@ -17,7 +17,7 @@ public class MatrixConversions {
             }
             result.add(newRow);
         }
-        return new Matrix<>(matrix.getWidth(), matrix.getHeight(), result);
+        return new Matrix<>(matrix.getHeight(), matrix.getWidth(), result);
     }
 
     public static <T> Matrix<T> transpose(Matrix<T> matrix) {
