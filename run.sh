@@ -16,8 +16,8 @@ main() {
     out1File=$(mktemp)
     out2File=$(mktemp)
 
-    run -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
-    run -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
+    run -i1 < "target/classes/$1_party1.txt" > ${out1File} &
+    run -i2 < "target/classes/$1_party2.txt" > ${out2File} &
     wait
 
     out1=$(cat ${out1File})
