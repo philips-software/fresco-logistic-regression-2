@@ -16,8 +16,8 @@ main() {
     out1File=$(mktemp)
     out2File=$(mktemp)
 
-    run -i1 < target/classes/mtcars_party1.txt > ${out1File} 2> party1.log &
-    run -i2 < target/classes/mtcars_party2.txt > ${out2File} 2> party2.log &
+    run -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
+    run -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
     wait
 
     out1=$(cat ${out1File})
@@ -32,4 +32,16 @@ main() {
     fi
 }
 
-time main
+if [[ -z "$1" ]]; then
+    echo "Usage: "
+    echo "  $0 <test-set>"
+    echo
+    echo "Example: $0 mtcars"
+    echo
+    echo "Available test sets:"
+    echo "  mtcars"
+    echo "  breast_cancer"
+    exit 1
+fi
+
+time main $1
