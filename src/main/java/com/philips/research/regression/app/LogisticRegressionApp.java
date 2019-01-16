@@ -76,8 +76,8 @@ public class LogisticRegressionApp implements Callable<Void> {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Input input = new Gson().fromJson(reader, Input.class);
-        Matrix<BigDecimal> m = map(matrix(input.matrix), BigDecimal::valueOf);
-        Vector<BigDecimal> v = vectorOf(input.vector);
+        Matrix<BigDecimal> m = map(matrix(input.predictors), BigDecimal::valueOf);
+        Vector<BigDecimal> v = vectorOf(input.outcomes);
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
         BigInteger modulus = ModulusFinder.findSuitableModulus(512);
@@ -106,8 +106,8 @@ public class LogisticRegressionApp implements Callable<Void> {
     }
 
     private class Input {
-        Double[][] matrix;
-        double[] vector;
+        Double[][] predictors;
+        double[] outcomes;
     }
 
     private HashMap<Integer, Party> createPartyMap() {
