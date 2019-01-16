@@ -1,5 +1,6 @@
 package com.philips.research.regression.app;
 
+import com.google.gson.Gson;
 import dk.alexandra.fresco.framework.Party;
 import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
@@ -32,6 +33,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
+
+import static com.philips.research.regression.util.MatrixConstruction.matrix;
+import static com.philips.research.regression.util.MatrixConversions.map;
+import static com.philips.research.regression.util.VectorUtils.vectorOf;
 
 @CommandLine.Command(
     description = "Secure Multi-Party Logistic Regression",
@@ -70,8 +75,9 @@ public class LogisticRegressionApp implements Callable<Void> {
         HashMap<Integer, Party> partyMap = createPartyMap();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        Matrix<BigDecimal> m = readMatrix(reader);
-        Vector<BigDecimal> v = readVector(reader);
+        Input input = new Gson().fromJson(reader, Input.class);
+        Matrix<BigDecimal> m = map(matrix(input.matrix), BigDecimal::valueOf);
+        Vector<BigDecimal> v = vectorOf(input.vector);
 
         LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
         BigInteger modulus = ModulusFinder.findSuitableModulus(512);
@@ -99,41 +105,9 @@ public class LogisticRegressionApp implements Callable<Void> {
         return null;
     }
 
-    private Matrix<BigDecimal> readMatrix(BufferedReader reader) throws IOException {
-        String matrixString = reader.readLine();
-        String preprocessed = matrixString.replace("]", "\n")
-                                          .replace("[", " ")
-                                          .replace(",", " ");
-        BufferedReader matrixReader = new BufferedReader(new StringReader(preprocessed));
-        ArrayList<ArrayList<BigDecimal>> rows = new ArrayList<>();
-        String line = matrixReader.readLine();
-        while (line != null && !line.isEmpty()) {
-            ArrayList<BigDecimal> row = new ArrayList<>();
-            Scanner sc = new Scanner(line);
-            sc.useLocale(Locale.US);
-            while (sc.hasNextDouble()) {
-                double d = sc.nextDouble();
-                row.add(BigDecimal.valueOf(d));
-            }
-            rows.add(row);
-            line = matrixReader.readLine();
-        }
-        return new Matrix<>(rows.size(), rows.get(0).size(), rows::get);
-    }
-
-    private Vector<BigDecimal> readVector(BufferedReader reader) throws IOException {
-        String vectorString = reader.readLine();
-        String preprocessed = vectorString
-            .replace("]", "\n")
-            .replace("[", " ")
-            .replace(",", " ");
-        Vector<BigDecimal> vector = new Vector<>();
-        Scanner sc = new Scanner(preprocessed);
-        sc.useLocale(Locale.US);
-        while (sc.hasNextDouble()) {
-            vector.add(BigDecimal.valueOf(sc.nextDouble()));
-        }
-        return vector;
+    private class Input {
+        Double[][] matrix;
+        double[] vector;
     }
 
     private HashMap<Integer, Party> createPartyMap() {
