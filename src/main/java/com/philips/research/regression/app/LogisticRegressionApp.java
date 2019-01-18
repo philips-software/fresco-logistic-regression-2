@@ -112,7 +112,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         SecureComputationEngineImpl<SpdzResourcePool, ProtocolBuilderNumeric> sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
         OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
         SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, noOfPlayers, modulus);
-        SpdzResourcePoolImpl resourcePool = new SpdzResourcePoolImpl(myId, noOfPlayers, store, supplier, new AesCtrDrbg(new byte[32]));
+        SpdzResourcePoolImpl resourcePool = new SpdzResourcePoolImpl(myId, noOfPlayers, store, supplier, new AesCtrDrbg());
 
         List<BigDecimal> result = sce.runApplication(frescoApp, resourcePool, network);
 
