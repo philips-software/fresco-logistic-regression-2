@@ -7,7 +7,10 @@ import dk.alexandra.fresco.lib.real.SReal;
 import dk.alexandra.fresco.propability.SampleLaplaceDistribution;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Vector;
+
+import static java.math.BigDecimal.valueOf;
 
 public class LaplaceNoiseFactory implements NoiseFactory {
     private final BigDecimal epsilon;
@@ -40,8 +43,11 @@ class LaplaceNoiseGenerator implements Computation<Vector<DRes<SReal>>, Protocol
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
             Vector<DRes<SReal>> noiseVector = new Vector<>();
+            BigDecimal b = sensitivity
+                .divide(epsilon, 15, RoundingMode.HALF_UP)
+                .divide(valueOf(input.out().size()), 15, RoundingMode.HALF_UP);
             for (int i = 0; i < input.out().size(); ++i) {
-                DRes<SReal> noise = seq.seq(new SampleLaplaceDistribution(sensitivity.divide(epsilon)));
+                DRes<SReal> noise = seq.seq(new SampleLaplaceDistribution(b));
                 noiseVector.add(noise);
             }
             return () -> noiseVector;

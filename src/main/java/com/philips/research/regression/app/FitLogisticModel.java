@@ -15,6 +15,7 @@ import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.lib.real.SReal;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Vector;
 
@@ -32,6 +33,8 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     private final int numberOfIterations;
     private final Matrix<BigDecimal> myX;
     private final Vector<BigDecimal> myY;
+    private final BigDecimal privacyBudget;
+    private final BigDecimal sensitivity;
 
     public FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs, List<DRes<Vector<DRes<SReal>>>> Ys,
                             double lambda, int numberOfIterations,
@@ -42,6 +45,22 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         this.numberOfIterations = numberOfIterations;
         this.myX = myX;
         this.myY = myY;
+        this.privacyBudget = null;
+        this.sensitivity = null;
+    }
+
+    public FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs, List<DRes<Vector<DRes<SReal>>>> Ys,
+                            double lambda, int numberOfIterations,
+                            Matrix<BigDecimal> myX, Vector<BigDecimal> myY,
+                            BigDecimal privacyBudget, BigDecimal sensitivity) {
+        this.Xs = Xs;
+        this.Ys = Ys;
+        this.lambda = lambda;
+        this.numberOfIterations = numberOfIterations;
+        this.myX = myX;
+        this.myY = myY;
+        this.privacyBudget = privacyBudget;
+        this.sensitivity = sensitivity;
     }
 
     @Override
@@ -52,9 +71,12 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
 
             DRes<Matrix<DRes<SReal>>> L = seq.seq(new CholeskyDecompositionOfHessian());
             DRes<Vector<DRes<SReal>>> beta = seq.realLinAlg().input(new Vector<>(nCopies(width, valueOf(0))), 1);
+            BigDecimal epsilon = privacyBudget != null
+                ? privacyBudget.divide(valueOf(numberOfIterations), 15, RoundingMode.HALF_UP)
+                : null;
             for (int i=0; i<numberOfIterations; i++) {
                 log(seq, "Iteration " + i);
-                beta = seq.seq(new SingleIteration(beta, L, myX, myY));
+                beta = seq.seq(new SingleIteration(beta, L, myX, myY, epsilon, sensitivity));
             }
 
             return beta;
@@ -92,13 +114,18 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         private final DRes<Matrix<DRes<SReal>>> L;
         private final Matrix<BigDecimal> myX;
         private final Vector<BigDecimal> myY;
+        private final BigDecimal epsilon;
+        private final BigDecimal sensitivity;
 
         private SingleIteration(DRes<Vector<DRes<SReal>>> initialBeta, DRes<Matrix<DRes<SReal>>> L,
-                                Matrix<BigDecimal> myX, Vector<BigDecimal> myY) {
+                                Matrix<BigDecimal> myX, Vector<BigDecimal> myY,
+                                BigDecimal epsilon, BigDecimal sensitivity) {
             this.beta = initialBeta;
             this.L = L;
             this.myX = myX;
             this.myY = myY;
+            this.epsilon = epsilon;
+            this.sensitivity = sensitivity;
         }
 
         @Override
@@ -131,7 +158,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
 
                 lprime = seq.seq(new SubtractVectors(lprime, seq.seq(new ScaleVector(valueOf(lambda), beta))));
                 log(seq, "Update learned model");
-                return seq.seq(new UpdateLearnedModel(L, beta, lprime));
+                return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, sensitivity));
             });
         }
     }
