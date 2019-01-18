@@ -9,6 +9,8 @@ run () {
         -jar target/logistic-regression-jar-with-dependencies.jar \
         -p1:localhost:8871 \
         -p2:localhost:8872 \
+        --privacy-budget 1 \
+        --sensitivity 0.001 \
         $@
 }
 
