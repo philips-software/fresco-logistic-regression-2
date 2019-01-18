@@ -107,6 +107,8 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 DRes<Vector<DRes<BigDecimal>>> openBeta = seq.realLinAlg().openVector(beta);
                 return () -> openBeta;
             }).seq((seq, openBeta) -> {
+                Vector<BigDecimal> unwrappedBeta = unwrapVector(openBeta);
+                log(seq, "    beta is now " + unwrappedBeta);
                 DRes<Vector<DRes<SReal>>> lprime = null;
                 for (int party=1; party<=Xs.size(); party++) {
                     log(seq, "    logLikelihoodPrime " + party);
@@ -114,7 +116,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                     DRes<Vector<DRes<SReal>>> Y = Ys.get(party - 1);
                     DRes<Vector<DRes<SReal>>> logLikelihoodPrime;
                     if (party == builder.getBasicNumericContext().getMyId()) {
-                        Vector<BigDecimal> localLogLikelihoodPrime = new LocalLogLikelihoodPrime(myX, myY, unwrapVector(openBeta)).compute();
+                        Vector<BigDecimal> localLogLikelihoodPrime = new LocalLogLikelihoodPrime(myX, myY, unwrappedBeta).compute();
                         logLikelihoodPrime = seq.realLinAlg().input(localLogLikelihoodPrime, party);
                     } else {
                         Vector<BigDecimal> dummyVector = VectorUtils.vectorWithZeros(beta.out().size());
