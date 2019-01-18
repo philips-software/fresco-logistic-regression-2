@@ -15,6 +15,10 @@ public class TimestampedMarker implements Computation<Void, ProtocolBuilderNumer
         this.message = message;
     }
 
+    public static void log(ProtocolBuilderNumeric builder, String msg) {
+        builder.seq(new TimestampedMarker(msg));
+    }
+
     @Override
     public DRes<Void> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {

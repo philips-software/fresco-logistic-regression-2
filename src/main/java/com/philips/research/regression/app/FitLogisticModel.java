@@ -1,6 +1,5 @@
 package com.philips.research.regression.app;
 
-import com.philips.research.regression.logging.TimestampedMarker;
 import com.philips.research.regression.primitives.Cholesky;
 import com.philips.research.regression.primitives.Hessian;
 import com.philips.research.regression.primitives.LocalLogLikelihoodPrime;
@@ -19,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
+import static com.philips.research.regression.logging.TimestampedMarker.log;
 import static com.philips.research.regression.util.ListConversions.unwrapVector;
 import static com.philips.research.regression.util.MatrixConstruction.identity;
 import static com.philips.research.regression.util.MatrixConversions.map;
@@ -136,8 +136,5 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         }
     }
 
-    private static void log(ProtocolBuilderNumeric builder, String msg) {
-        builder.seq(new TimestampedMarker(msg));
-    }
 }
 
