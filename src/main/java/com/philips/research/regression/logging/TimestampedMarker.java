@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.logging;
 
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
@@ -6,12 +6,12 @@ import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TimestampedMarker implements Computation<Void, ProtocolBuilderNumeric> {
+public class TimestampedMarker implements Computation<Void, ProtocolBuilderNumeric> {
 
     private static final Logger logger = LoggerFactory.getLogger(TimestampedMarker.class);
     private final String message;
 
-    TimestampedMarker(String message) {
+    public TimestampedMarker(String message) {
         this.message = message;
     }
 
