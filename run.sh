@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
 
