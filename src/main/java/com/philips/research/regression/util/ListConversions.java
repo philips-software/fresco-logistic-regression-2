@@ -16,7 +16,11 @@ public class ListConversions {
     }
 
     public static <T, L extends Vector<DRes<T>>> Vector<T> unwrapVector(DRes<L> list) {
-        return list.out().stream().map(DRes::out).collect(Collectors.toCollection(Vector::new));
+        return unwrapVector(list.out());
+    }
+
+    public static <T> Vector<T> unwrapVector(Vector<DRes<T>> list) {
+        return list.stream().map(DRes::out).collect(Collectors.toCollection(Vector::new));
     }
 
     interface ElementConversion<T,U> {

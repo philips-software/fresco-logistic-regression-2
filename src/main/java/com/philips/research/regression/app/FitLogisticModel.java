@@ -19,6 +19,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Vector;
 
+import static com.philips.research.regression.logging.TimestampedMarker.log;
 import static com.philips.research.regression.util.ListConversions.unwrapVector;
 import static com.philips.research.regression.util.MatrixConstruction.identity;
 import static com.philips.research.regression.util.MatrixConversions.map;
@@ -65,6 +66,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     @Override
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
+            log(seq, "Started computation");
             int width = Xs.get(0).out().getWidth();
 
             DRes<Matrix<DRes<SReal>>> L = seq.seq(new CholeskyDecompositionOfHessian());
@@ -73,6 +75,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 ? privacyBudget.divide(valueOf(numberOfIterations), 15, RoundingMode.HALF_UP)
                 : null;
             for (int i=0; i<numberOfIterations; i++) {
+                log(seq, "Iteration " + i);
                 beta = seq.seq(new SingleIteration(beta, L, myX, myY, epsilon, sensitivity));
             }
 
@@ -91,12 +94,14 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
             return builder.seq(seq -> {
                 int width = Xs.get(0).out().getWidth();
 
+                log(seq, "Compute hessian");
                 DRes<Matrix<DRes<SReal>>> H = null;
                 for (DRes<Matrix<DRes<SReal>>> X: Xs) {
                     DRes<Matrix<DRes<SReal>>> hessian = seq.seq(new Hessian(X));
                     H = H == null ? hessian : seq.realLinAlg().add(H, hessian);
                 }
 
+                log(seq, "Cholesky");
                 Matrix<BigDecimal> I = identity(width);
                 H = seq.realLinAlg().sub(H, scale(lambda, I));
                 return seq.seq(new Cholesky(seq.realLinAlg().scale(valueOf(-1), H)));
@@ -129,13 +134,16 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 DRes<Vector<DRes<BigDecimal>>> openBeta = seq.realLinAlg().openVector(beta);
                 return () -> openBeta;
             }).seq((seq, openBeta) -> {
+                Vector<BigDecimal> unwrappedBeta = unwrapVector(openBeta);
+                log(seq, "    beta is now " + unwrappedBeta);
                 DRes<Vector<DRes<SReal>>> lprime = null;
                 for (int party=1; party<=Xs.size(); party++) {
+                    log(seq, "    logLikelihoodPrime " + party);
                     DRes<Matrix<DRes<SReal>>> X = Xs.get(party - 1);
                     DRes<Vector<DRes<SReal>>> Y = Ys.get(party - 1);
                     DRes<Vector<DRes<SReal>>> logLikelihoodPrime;
                     if (party == builder.getBasicNumericContext().getMyId()) {
-                        Vector<BigDecimal> localLogLikelihoodPrime = new LocalLogLikelihoodPrime(myX, myY, unwrapVector(openBeta)).compute();
+                        Vector<BigDecimal> localLogLikelihoodPrime = new LocalLogLikelihoodPrime(myX, myY, unwrappedBeta).compute();
                         logLikelihoodPrime = seq.realLinAlg().input(localLogLikelihoodPrime, party);
                     } else {
                         Vector<BigDecimal> dummyVector = VectorUtils.vectorWithZeros(beta.out().size());
@@ -149,6 +157,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 }
 
                 lprime = seq.seq(new SubtractVectors(lprime, seq.seq(new ScaleVector(valueOf(lambda), beta))));
+                log(seq, "    update learned model");
                 return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, sensitivity));
             });
         }
