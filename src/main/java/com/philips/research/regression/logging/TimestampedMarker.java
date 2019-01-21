@@ -11,12 +11,20 @@ public class TimestampedMarker implements Computation<Void, ProtocolBuilderNumer
     private static final Logger logger = LoggerFactory.getLogger(TimestampedMarker.class);
     private final String message;
 
-    public TimestampedMarker(String message) {
+    private TimestampedMarker(String message) {
         this.message = message;
     }
 
     public static void log(ProtocolBuilderNumeric builder, String msg) {
         builder.seq(new TimestampedMarker(msg));
+    }
+
+    public static void log(ProtocolBuilderNumeric builder, Computation<String, ProtocolBuilderNumeric> computation) {
+        if (logger.isDebugEnabled()) {
+            builder
+                .seq(computation)
+                .seq((seq, result) -> seq.seq(new TimestampedMarker(result)));
+        }
     }
 
     @Override
