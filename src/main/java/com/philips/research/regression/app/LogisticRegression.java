@@ -1,6 +1,5 @@
 package com.philips.research.regression.app;
 
-import com.philips.research.regression.FitLogisticModel;
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;

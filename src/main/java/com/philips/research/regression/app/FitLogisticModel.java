@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.app;
 
 import com.philips.research.regression.primitives.Cholesky;
 import com.philips.research.regression.primitives.Hessian;

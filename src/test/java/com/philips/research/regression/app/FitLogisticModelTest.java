@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.app;
 
 import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.DRes;
@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import static com.philips.research.regression.CarDataSet.*;
 import static com.philips.research.regression.Runner.run;
+import static com.philips.research.regression.app.CarDataSet.*;
 import static com.philips.research.regression.util.ListAssert.assertEquals;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrix;

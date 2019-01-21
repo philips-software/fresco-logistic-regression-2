@@ -1,4 +1,4 @@
-package com.philips.research.regression;
+package com.philips.research.regression.app;
 
 import java.math.BigDecimal;
 import java.util.Vector;
