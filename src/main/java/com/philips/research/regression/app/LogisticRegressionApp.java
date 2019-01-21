@@ -1,5 +1,7 @@
 package com.philips.research.regression.app;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.google.gson.Gson;
 import dk.alexandra.fresco.framework.Party;
 import dk.alexandra.fresco.framework.ProtocolEvaluator;
@@ -25,6 +27,7 @@ import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDummyDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
@@ -82,6 +85,12 @@ public class LogisticRegressionApp implements Callable<Void> {
         description = "Determines the sensitivity parameter used for differential privacy. If omitted, it is 1 divided by the number of rows in the input data."
     )
     private double sensitivity;
+    @Option(
+        names = {"--unsafe-debug-log"},
+        defaultValue = "false",
+        description = "Enables debug logging. ⚠️ Warning: exposes secret values in order to log them! ⚠️"
+    )
+    private boolean unsafeDebugLogging;
 
     public static void main(String[] args) {
         CommandLine.call(new LogisticRegressionApp(), args);
@@ -89,6 +98,7 @@ public class LogisticRegressionApp implements Callable<Void> {
 
     @Override
     public Void call() throws IOException {
+        setLogLevel();
         HashMap<Integer, Party> partyMap = createPartyMap();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -120,6 +130,13 @@ public class LogisticRegressionApp implements Callable<Void> {
         ((Closeable)network).close();
         sce.shutdownSCE();
         return null;
+    }
+
+    private void setLogLevel() {
+        if (unsafeDebugLogging) {
+            Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+            logger.setLevel(Level.DEBUG);
+        }
     }
 
     private class Input {

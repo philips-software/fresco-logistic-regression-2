@@ -11,6 +11,7 @@ run () {
         -p2:localhost:8872 \
         --privacy-budget 1 \
         --sensitivity 0.001 \
+        --unsafe-debug-log \
         $@
 }
 
