@@ -95,7 +95,7 @@ class UpdateLearnedModelApplication implements Application<Vector<BigDecimal>, P
         if (noiseFactory != null) {
             result = builder.seq(new UpdateLearnedModel(LClosed, betaClosed, lClosed, noiseFactory));
         } else {
-            result = builder.seq(new UpdateLearnedModel(LClosed, betaClosed, lClosed));
+            result = builder.seq(new UpdateLearnedModel(LClosed, betaClosed, lClosed, null, null));
         }
         DRes<Vector<DRes<BigDecimal>>> opened = builder.realLinAlg().openVector(result);
         return () -> new Vector<>(unwrap(opened));

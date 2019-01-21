@@ -28,10 +28,15 @@ import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.Callable;
 
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
@@ -45,9 +50,9 @@ import static com.philips.research.regression.util.VectorUtils.vectorOf;
     version = "Logistic Regression 0.1.0")
 public class LogisticRegressionApp implements Callable<Void> {
     @Option(
-        names={"-i", "--myId"},
-        required=true,
-        description="Id of this party.")
+        names = {"-i", "--myId"},
+        required = true,
+        description = "Id of this party.")
     private int myId;
     @Option(
         names = {"-p", "--party"},
@@ -56,15 +61,27 @@ public class LogisticRegressionApp implements Callable<Void> {
         description = "Specification of a party. One of these needs to be present for each party. For example: '-p1:localhost:8871 -p2:localhost:8872'.")
     private String[] parties;
     @Option(
-        names={"--lambda"},
-        defaultValue="1.0",
-        description="Lambda for fitting the logistic model. If omitted, the default value is ${DEFAULT-VALUE}.")
+        names = {"--lambda"},
+        defaultValue = "1.0",
+        description = "Lambda for fitting the logistic model. If omitted, the default value is ${DEFAULT-VALUE}.")
     private double lambda;
     @Option(
-        names={"--iterations"},
-        defaultValue="5",
-        description="The number of iterations performed by the fitter. If omitted, the default value is ${DEFAULT-VALUE}.")
+        names = {"--iterations"},
+        defaultValue = "5",
+        description = "The number of iterations performed by the fitter. If omitted, the default value is ${DEFAULT-VALUE}.")
     private int iterations;
+    @Option(
+        names = {"--privacy-budget", "-b"},
+        defaultValue = "0",
+        description = "Enables using differential privacy for updating the weights given this budget. If omitted, differential privacy is not used."
+    )
+    private double privacyBudget;
+    @Option(
+        names = {"--sensitivity", "-s"},
+        defaultValue = "0",
+        description = "Determines the sensitivity parameter used for differential privacy. If omitted, it is 1 divided by the number of rows in the input data."
+    )
+    private double sensitivity;
 
     public static void main(String[] args) {
         CommandLine.call(new LogisticRegressionApp(), args);
@@ -79,7 +96,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         Matrix<BigDecimal> m = map(matrix(input.predictors), BigDecimal::valueOf);
         Vector<BigDecimal> v = vectorOf(input.outcomes);
 
-        LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations);
+        LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations, privacyBudget, sensitivity);
         BigInteger modulus = ModulusFinder.findSuitableModulus(512);
 
         Network network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));

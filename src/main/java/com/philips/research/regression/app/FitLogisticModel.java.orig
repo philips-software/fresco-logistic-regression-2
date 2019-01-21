@@ -73,7 +73,12 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 ? privacyBudget.divide(valueOf(numberOfIterations), 15, RoundingMode.HALF_UP)
                 : null;
             for (int i=0; i<numberOfIterations; i++) {
+<<<<<<< ours
+                beta = seq.seq(new SingleIteration(beta, L, myX, myY));
+=======
+                log(seq, "Iteration " + i);
                 beta = seq.seq(new SingleIteration(beta, L, myX, myY, epsilon, sensitivity));
+>>>>>>> theirs
             }
 
             return beta;
@@ -149,7 +154,12 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 }
 
                 lprime = seq.seq(new SubtractVectors(lprime, seq.seq(new ScaleVector(valueOf(lambda), beta))));
+<<<<<<< ours
+                return seq.seq(new UpdateLearnedModel(L, beta, lprime));
+=======
+                log(seq, "Update learned model");
                 return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, sensitivity));
+>>>>>>> theirs
             });
         }
     }

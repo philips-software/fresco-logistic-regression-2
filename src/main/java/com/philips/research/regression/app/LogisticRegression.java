@@ -16,6 +16,7 @@ import java.util.Vector;
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrixWithZeros;
 import static com.philips.research.regression.util.VectorUtils.vectorWithZeros;
+import static java.math.BigDecimal.valueOf;
 
 class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
     private final int myId;
@@ -23,17 +24,24 @@ class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilde
     private final Vector<BigDecimal> vector;
     private final double lambda;
     private final int iterations;
+    private final double privacyBudget;
+    private final double sensitivity;
 
-    LogisticRegression(int myId, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations) {
+    LogisticRegression(int myId, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations, double privacyBudget, double sensitivity) {
         this.myId = myId;
         this.matrix = matrix;
         this.vector =  vector;
         this.lambda = lambda;
         this.iterations = iterations;
+        this.privacyBudget = privacyBudget;
+        this.sensitivity = sensitivity;
     }
 
     @Override
     public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
+        final double sensitivity = this.sensitivity > 0
+            ? this.sensitivity
+            : 1.0 / (matrix.getHeight() * 2.0);
         return builder.par(par -> {
             DRes<Matrix<DRes<SReal>>> x1, x2;
             DRes<Vector<DRes<SReal>>> y1, y2;
@@ -63,7 +71,9 @@ class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilde
             List<DRes<Matrix<DRes<SReal>>>> closedXs = inputs.getFirst();
             List<DRes<Vector<DRes<SReal>>>> closedYs = inputs.getSecond();
 
-            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations, matrix, vector));
+            DRes<Vector<DRes<SReal>>> result = privacyBudget > 0
+                ? seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations, matrix, vector, valueOf(privacyBudget), valueOf(sensitivity)))
+                : seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations, matrix, vector));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
             return () -> unwrap(opened);
         });
