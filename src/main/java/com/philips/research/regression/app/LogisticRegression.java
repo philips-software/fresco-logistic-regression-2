@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.philips.research.regression.util.ListConversions.unwrap;
 import static com.philips.research.regression.util.MatrixConstruction.matrixWithZeros;
@@ -29,7 +31,7 @@ class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilde
 
     LogisticRegression(int myId, Matrix<BigDecimal> matrix, Vector<BigDecimal> vector, double lambda, int iterations, double privacyBudget, double sensitivity) {
         this.myId = myId;
-        this.matrix = matrix;
+        this.matrix = new MatrixWithIntercept(matrix);
         this.vector =  vector;
         this.lambda = lambda;
         this.iterations = iterations;
@@ -78,6 +80,15 @@ class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilde
             return () -> unwrap(opened);
         });
     }
-
 }
 
+class MatrixWithIntercept extends Matrix<BigDecimal> {
+    MatrixWithIntercept(Matrix<BigDecimal> matrix) {
+        super(matrix.getHeight(), matrix.getWidth() + 1, (rowNumber) -> {
+            ArrayList<BigDecimal> row = matrix.getRow(rowNumber);
+            return Stream
+                .concat(row.stream(), Stream.of(valueOf(1)))
+                .collect(Collectors.toCollection(ArrayList::new));
+        });
+    }
+}
