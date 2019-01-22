@@ -6,6 +6,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 
 import java.util.Vector;
 
+// TODO: remove once this pull request is accepted: https://github.com/aicis/fresco/pull/328
 public class AddVectors extends BinaryVectorOperation {
 
     public AddVectors(DRes<Vector<DRes<SReal>>> left, DRes<Vector<DRes<SReal>>> right) {

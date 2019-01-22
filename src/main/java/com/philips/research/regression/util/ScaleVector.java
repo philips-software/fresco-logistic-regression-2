@@ -8,6 +8,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.math.BigDecimal;
 import java.util.Vector;
 
+// TODO: remove once this pull request is accepted: https://github.com/aicis/fresco/pull/328
 public class ScaleVector implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
 
     private final DRes<Vector<DRes<SReal>>> operand;
