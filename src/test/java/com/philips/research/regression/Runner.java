@@ -9,6 +9,7 @@ import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePool;
 
 import static dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy.SEQUENTIAL;
 
+// TODO: remove once this pull request is accepted: https://github.com/aicis/fresco/pull/327
 public class Runner {
     static public <T> T run(Application<T, ProtocolBuilderNumeric> application) {
         return run(application, 1);
