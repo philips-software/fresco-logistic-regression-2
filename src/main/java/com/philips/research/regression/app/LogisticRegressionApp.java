@@ -7,17 +7,17 @@ import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.Party;
 import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
+import dk.alexandra.fresco.framework.configuration.NetworkConfiguration;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
 import dk.alexandra.fresco.framework.network.AsyncNetwork;
+import dk.alexandra.fresco.framework.network.CloseableNetwork;
 import dk.alexandra.fresco.framework.network.Network;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
 import dk.alexandra.fresco.framework.sce.evaluator.EvaluationStrategy;
-import dk.alexandra.fresco.framework.util.AesCtrDrbg;
-import dk.alexandra.fresco.framework.util.ModulusFinder;
-import dk.alexandra.fresco.framework.util.OpenedValueStore;
+import dk.alexandra.fresco.framework.util.*;
 import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.logging.BatchEvaluationLoggingDecorator;
 import dk.alexandra.fresco.logging.EvaluatorLoggingDecorator;
@@ -30,8 +30,12 @@ import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
 import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDataSupplier;
-import dk.alexandra.fresco.suite.spdz.storage.SpdzDummyDataSupplier;
+import dk.alexandra.fresco.suite.spdz.storage.SpdzMascotDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
+import dk.alexandra.fresco.tools.mascot.field.FieldElement;
+import dk.alexandra.fresco.tools.ot.base.DummyOt;
+import dk.alexandra.fresco.tools.ot.base.Ot;
+import dk.alexandra.fresco.tools.ot.otextension.RotList;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
@@ -42,11 +46,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.philips.research.regression.util.MatrixConstruction.matrix;
 import static com.philips.research.regression.util.MatrixConversions.map;
@@ -138,7 +141,7 @@ public class LogisticRegressionApp implements Callable<Void> {
     private void setLogLevel() {
         if (unsafeDebugLogging) {
             Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-            logger.setLevel(Level.DEBUG);
+            logger.setLevel(Level.ALL);
         }
     }
 
@@ -160,31 +163,40 @@ public class LogisticRegressionApp implements Callable<Void> {
 }
 
 abstract class ApplicationRunner <Output> {
+    final int modBitLength = 512;
+    NetworkFactory networkFactory;
     Network network;
     BigInteger modulus;
 
     ApplicationRunner(int myId, Map<Integer, Party> partyMap) {
         network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
         network = new NetworkLoggingDecorator(network);
-        modulus = ModulusFinder.findSuitableModulus(512);
+        networkFactory = new NetworkFactory(partyMap);
+        modulus = ModulusFinder.findSuitableModulus(modBitLength);
     }
 
     abstract Output run(Application<Output, ProtocolBuilderNumeric> application);
 
     void close() throws IOException {
+        networkFactory.close();
         ((Closeable)network).close();
     }
 }
 
 class SpdzRunner <Output> extends ApplicationRunner<Output> {
 
+    private static final int PRG_SEED_LENGTH = 256;
+    private static final int MAX_BIT_LENGTH = 200;
+    private static final int FIXED_POINT_PRECISION = 16;
+
     private SecureComputationEngineImpl<SpdzResourcePool, ProtocolBuilderNumeric> sce;
     private SpdzResourcePoolImpl resourcePool;
 
     SpdzRunner(int myId, Map<Integer, Party> partyMap) {
         super(myId, partyMap);
+        int numberOfPlayers = partyMap.size();
 
-        SpdzProtocolSuite protocolSuite = new SpdzProtocolSuite(200, 16);
+        SpdzProtocolSuite protocolSuite = new SpdzProtocolSuite(MAX_BIT_LENGTH, FIXED_POINT_PRECISION);
         BatchEvaluationStrategy<SpdzResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
         strategy = new BatchEvaluationLoggingDecorator<>(strategy);
         ProtocolEvaluator<SpdzResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
@@ -192,9 +204,49 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
         sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
 
         OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
-        SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, partyMap.size(), modulus);
-        resourcePool = new SpdzResourcePoolImpl(myId, partyMap.size(), store, supplier, new AesCtrDrbg());
+        Drbg drbg = getDrbg(myId);
+        List<Integer> partyIds = new ArrayList<>(partyMap.keySet());
+        Map<Integer, RotList> seedOts = getSeedOts(myId, partyIds, PRG_SEED_LENGTH, drbg, network);
+        FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(modulus, PRG_SEED_LENGTH);
+        PreprocessedValuesSupplier preprocessedValuesSupplier
+            = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, modulus, seedOts, drbg, ssk, MAX_BIT_LENGTH);
+        SpdzDataSupplier supplier = SpdzMascotDataSupplier.createSimpleSupplier(
+            myId, numberOfPlayers,
+            () -> networkFactory.createExtraNetwork(myId),
+            modBitLength, modulus,
+            preprocessedValuesSupplier::provide,
+            seedOts, drbg, ssk);
+        resourcePool = new SpdzResourcePoolImpl(myId, numberOfPlayers, store, supplier, getDrbg(myId));
     }
+
+    private Drbg getDrbg(int myId) {
+        // This method was copied from Fresco AbstractSpdzTest
+        byte[] seed = new byte[SpdzRunner.PRG_SEED_LENGTH / 8];
+        new Random(myId).nextBytes(seed);
+        return AesCtrDrbgFactory.fromDerivedSeed(seed);
+    }
+
+    private Map<Integer, RotList> getSeedOts(int myId, List<Integer> partyIds, int prgSeedLength,
+                                             Drbg drbg, Network network) {
+        // This method was copied from Fresco AbstractSpdzTest
+        Map<Integer, RotList> seedOts = new HashMap<>();
+        for (Integer otherId : partyIds) {
+            if (myId != otherId) {
+                Ot ot = new DummyOt(otherId, network);
+                RotList currentSeedOts = new RotList(drbg, prgSeedLength);
+                if (myId < otherId) {
+                    currentSeedOts.send(ot);
+                    currentSeedOts.receive(ot);
+                } else {
+                    currentSeedOts.receive(ot);
+                    currentSeedOts.send(ot);
+                }
+                seedOts.put(otherId, currentSeedOts);
+            }
+        }
+        return seedOts;
+    }
+
 
     @Override
     public Output run(Application<Output, ProtocolBuilderNumeric> application) {
@@ -233,5 +285,45 @@ class DummyRunner <Output> extends ApplicationRunner<Output> {
     public void close() throws IOException {
         super.close();
         sce.shutdownSCE();
+    }
+}
+ class NetworkFactory implements Closeable {
+
+    private static final AtomicInteger PORT_OFFSET_COUNTER = new AtomicInteger(50);
+    private static final int PORT_INCREMENT = 10;
+    private final List<Closeable> openedNetworks;
+     private final Map<Integer, Party> parties;
+
+     public NetworkFactory(Map<Integer, Party> parties) {
+        this.parties = parties;
+        this.openedNetworks = new ArrayList<>();
+    }
+
+    public CloseableNetwork createExtraNetwork(int myId) {
+        int portOffset = PORT_OFFSET_COUNTER.addAndGet(PORT_INCREMENT);
+        Map<Integer, Party> partiesWithPortOffset = parties.entrySet()
+            .stream()
+            .peek(e -> e.setValue(applyOffset(portOffset, e.getValue())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        NetworkConfiguration config = new NetworkConfigurationImpl(myId, parties);
+        CloseableNetwork net = new AsyncNetwork(config);
+        openedNetworks.add(net);
+        return net;
+    }
+
+     private Party applyOffset(int portOffset, Party party) {
+         return new Party(party.getPartyId(), party.getHostname(), party.getPort() + portOffset);
+     }
+
+     @Override
+    public void close() {
+        openedNetworks.forEach(this::close);
+    }
+
+    private void close(Closeable closeable) {
+        ExceptionConverter.safe(() -> {
+            closeable.close();
+            return null;
+        }, "IO Exception");
     }
 }
