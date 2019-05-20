@@ -4,7 +4,22 @@ test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
 
 echo "Started at $(date)"
 
-run () {
+pid1=
+pid2=
+
+ctrl_c() {
+    echo "CTRL-C: cleanup $pid1 and $pid2"
+    kill -9 $pid1
+    kill -9 $pid2
+    exit 1
+}
+
+main() {
+    trap ctrl_c INT
+
+    out1File=$(mktemp)
+    out2File=$(mktemp)
+
     java \
         -jar target/logistic-regression-jar-with-dependencies.jar \
         -p1:localhost:8871 \
@@ -12,15 +27,17 @@ run () {
         --privacy-budget 1 \
         --sensitivity 0.001 \
         --unsafe-debug-log \
-        $@
-}
-
-main() {
-    out1File=$(mktemp)
-    out2File=$(mktemp)
-
-    run -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
-    run -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
+        -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
+    pid1=$!
+    java \
+        -jar target/logistic-regression-jar-with-dependencies.jar \
+        -p1:localhost:8871 \
+        -p2:localhost:8872 \
+        --privacy-budget 1 \
+        --sensitivity 0.001 \
+        --unsafe-debug-log \
+        -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
+    pid2=$!
     wait
 
     out1=$(cat ${out1File})
