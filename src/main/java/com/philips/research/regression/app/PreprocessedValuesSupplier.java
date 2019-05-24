@@ -5,6 +5,8 @@ import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.BuilderFactoryNumeric;
 import dk.alexandra.fresco.framework.builder.numeric.DefaultPreprocessedValues;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
+import dk.alexandra.fresco.framework.builder.numeric.field.FieldDefinition;
+import dk.alexandra.fresco.framework.builder.numeric.field.FieldElement;
 import dk.alexandra.fresco.framework.network.CloseableNetwork;
 import dk.alexandra.fresco.framework.network.Network;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
@@ -17,7 +19,6 @@ import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
 import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzMascotDataSupplier;
-import dk.alexandra.fresco.tools.mascot.field.FieldElement;
 import dk.alexandra.fresco.tools.ot.otextension.RotList;
 
 import java.math.BigInteger;
@@ -35,14 +36,14 @@ class PreprocessedValuesSupplier {
     private final int numberOfPlayers;
     private final Drbg drbg;
 
-    PreprocessedValuesSupplier(int myId, int numberOfPlayers, NetworkFactory networkFactory, SpdzProtocolSuite protocolSuite, int modBitLength, BigInteger modulus, Map<Integer, RotList> seedOts, Drbg drbg, FieldElement ssk, int maxBitLength) {
+    PreprocessedValuesSupplier(int myId, int numberOfPlayers, NetworkFactory networkFactory, SpdzProtocolSuite protocolSuite, int modBitLength, FieldDefinition definition, Map<Integer, RotList> seedOts, Drbg drbg, FieldElement ssk, int maxBitLength) {
         this.pipeNetwork = networkFactory.createExtraNetwork(myId);
         this.tripleSupplier = SpdzMascotDataSupplier.createSimpleSupplier(
             myId,
             numberOfPlayers,
             () -> pipeNetwork,
             modBitLength,
-            modulus,
+            definition,
             null,
             seedOts, drbg, ssk);
         this.maxBitLength = maxBitLength;
@@ -54,7 +55,7 @@ class PreprocessedValuesSupplier {
 
     SpdzSInt[] provide(Integer pipeLength) {
         SpdzResourcePoolImpl resourcePool = createResourcePool();
-        BuilderFactoryNumeric builderFactory = protocolSuite.init(resourcePool, pipeNetwork);
+        BuilderFactoryNumeric builderFactory = protocolSuite.init(resourcePool);
         ProtocolBuilderNumeric sequential = builderFactory.createSequential();
         DefaultPreprocessedValues preprocessedValues = new DefaultPreprocessedValues(sequential);
         TimestampedMarker.log(sequential, "... providing exponentiation series ...");

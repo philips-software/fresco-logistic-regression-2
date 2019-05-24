@@ -7,11 +7,13 @@ import dk.alexandra.fresco.framework.Application;
 import dk.alexandra.fresco.framework.Party;
 import dk.alexandra.fresco.framework.ProtocolEvaluator;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
+import dk.alexandra.fresco.framework.builder.numeric.field.BigIntegerFieldDefinition;
+import dk.alexandra.fresco.framework.builder.numeric.field.FieldElement;
 import dk.alexandra.fresco.framework.configuration.NetworkConfiguration;
 import dk.alexandra.fresco.framework.configuration.NetworkConfigurationImpl;
-import dk.alexandra.fresco.framework.network.AsyncNetwork;
 import dk.alexandra.fresco.framework.network.CloseableNetwork;
 import dk.alexandra.fresco.framework.network.Network;
+import dk.alexandra.fresco.framework.network.socket.SocketNetwork;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngine;
 import dk.alexandra.fresco.framework.sce.SecureComputationEngineImpl;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchEvaluationStrategy;
@@ -28,11 +30,9 @@ import dk.alexandra.fresco.suite.dummy.arithmetic.DummyArithmeticResourcePoolImp
 import dk.alexandra.fresco.suite.spdz.SpdzProtocolSuite;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
-import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzMascotDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
-import dk.alexandra.fresco.tools.mascot.field.FieldElement;
 import dk.alexandra.fresco.tools.ot.base.DummyOt;
 import dk.alexandra.fresco.tools.ot.base.Ot;
 import dk.alexandra.fresco.tools.ot.otextension.RotList;
@@ -169,7 +169,7 @@ abstract class ApplicationRunner <Output> {
     BigInteger modulus;
 
     ApplicationRunner(int myId, Map<Integer, Party> partyMap) {
-        network = new AsyncNetwork(new NetworkConfigurationImpl(myId, partyMap));
+        network = new SocketNetwork(new NetworkConfigurationImpl(myId, partyMap));
         network = new NetworkLoggingDecorator(network);
         networkFactory = new NetworkFactory(partyMap);
         modulus = ModulusFinder.findSuitableModulus(modBitLength);
@@ -203,17 +203,18 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
         evaluator = new EvaluatorLoggingDecorator<>(evaluator);
         sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
 
-        OpenedValueStore<SpdzSInt, BigInteger> store = new SpdzOpenedValueStoreImpl();
+        SpdzOpenedValueStoreImpl store = new SpdzOpenedValueStoreImpl();
         Drbg drbg = getDrbg(myId);
         List<Integer> partyIds = new ArrayList<>(partyMap.keySet());
         Map<Integer, RotList> seedOts = getSeedOts(myId, partyIds, PRG_SEED_LENGTH, drbg, network);
-        FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(modulus, PRG_SEED_LENGTH);
+        final BigIntegerFieldDefinition definition = new BigIntegerFieldDefinition(modulus);
+        FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(definition, PRG_SEED_LENGTH);
         PreprocessedValuesSupplier preprocessedValuesSupplier
-            = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, modulus, seedOts, drbg, ssk, MAX_BIT_LENGTH);
+            = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, drbg, ssk, MAX_BIT_LENGTH);
         SpdzDataSupplier supplier = SpdzMascotDataSupplier.createSimpleSupplier(
             myId, numberOfPlayers,
             () -> networkFactory.createExtraNetwork(myId),
-            modBitLength, modulus,
+            modBitLength, definition,
             preprocessedValuesSupplier::provide,
             seedOts, drbg, ssk);
         resourcePool = new SpdzResourcePoolImpl(myId, numberOfPlayers, store, supplier, getDrbg(myId));
@@ -268,12 +269,13 @@ class DummyRunner <Output> extends ApplicationRunner<Output> {
     DummyRunner(int myId, Map<Integer, Party> partyMap) {
         super(myId, partyMap);
 
-        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(modulus,200,16);
+        final BigIntegerFieldDefinition definition = new BigIntegerFieldDefinition(modulus);
+        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(definition,200,16);
         BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
         ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
         sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
 
-        resourcePool = new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), modulus);
+        resourcePool = new DummyArithmeticResourcePoolImpl(myId, partyMap.size(), definition);
     }
 
     @Override
@@ -306,7 +308,7 @@ class DummyRunner <Output> extends ApplicationRunner<Output> {
             .peek(e -> e.setValue(applyOffset(portOffset, e.getValue())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         NetworkConfiguration config = new NetworkConfigurationImpl(myId, parties);
-        CloseableNetwork net = new AsyncNetwork(config);
+        CloseableNetwork net = new SocketNetwork(config);
         openedNetworks.add(net);
         return net;
     }
