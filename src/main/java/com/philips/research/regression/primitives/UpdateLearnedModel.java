@@ -11,6 +11,8 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.math.BigDecimal;
 import java.util.Vector;
 
+import static com.philips.research.regression.logging.TimestampedMarker.log;
+
 public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> L;
     private final DRes<Vector<DRes<SReal>>> beta;
@@ -38,11 +40,14 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
     @Override
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
+            log(seq, "Forward Substitution");
             DRes<Vector<DRes<SReal>>> y = seq.seq(new ForwardSubstitution(L, l));
             DRes<Matrix<DRes<SReal>>> LTransposed = builder.realLinAlg().transpose(L);
+            log(seq, "Back Substitution");
             DRes<Vector<DRes<SReal>>> r = seq.seq(new BackSubstitution(LTransposed, y));
             DRes<Vector<DRes<SReal>>> updatedBeta = seq.par(new AddVectors(beta, r));
             if (this.noiseFactory != null) {
+                log(seq, "Adding noise");
                 DRes<Vector<DRes<SReal>>> noise = seq.seq(new LoggingNoiseGenerator(noiseFactory.createNoiseGenerator(updatedBeta)));
                 updatedBeta = seq.par(new AddVectors(updatedBeta, noise));
             }
