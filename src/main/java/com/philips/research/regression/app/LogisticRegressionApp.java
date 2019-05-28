@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -251,7 +252,8 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
 
     @Override
     public Output run(Application<Output, ProtocolBuilderNumeric> application) {
-        return sce.runApplication(application, resourcePool, network);
+        Duration timeout = Duration.ofHours(3);
+        return sce.runApplication(application, resourcePool, network, timeout);
     }
 
     @Override
