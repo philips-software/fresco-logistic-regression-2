@@ -1,13 +1,13 @@
 package com.philips.research.regression.util;
 
 import dk.alexandra.fresco.framework.DRes;
-import dk.alexandra.fresco.framework.builder.Computation;
+import dk.alexandra.fresco.framework.builder.ComputationParallel;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.real.SReal;
 
 import java.util.Vector;
 
-abstract class BinaryVectorOperation implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
+abstract class BinaryVectorOperation implements ComputationParallel<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
 
     private final DRes<Vector<DRes<SReal>>> left;
     private final DRes<Vector<DRes<SReal>>> right;

@@ -41,10 +41,10 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
             DRes<Vector<DRes<SReal>>> y = seq.seq(new ForwardSubstitution(L, l));
             DRes<Matrix<DRes<SReal>>> LTransposed = builder.realLinAlg().transpose(L);
             DRes<Vector<DRes<SReal>>> r = seq.seq(new BackSubstitution(LTransposed, y));
-            DRes<Vector<DRes<SReal>>> updatedBeta = seq.seq(new AddVectors(beta, r));
+            DRes<Vector<DRes<SReal>>> updatedBeta = seq.par(new AddVectors(beta, r));
             if (this.noiseFactory != null) {
                 DRes<Vector<DRes<SReal>>> noise = seq.seq(new LoggingNoiseGenerator(noiseFactory.createNoiseGenerator(updatedBeta)));
-                updatedBeta = seq.seq(new AddVectors(updatedBeta, noise));
+                updatedBeta = seq.par(new AddVectors(updatedBeta, noise));
             }
             return updatedBeta;
         });
