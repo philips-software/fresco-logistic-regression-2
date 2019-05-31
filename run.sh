@@ -6,6 +6,7 @@ echo "Started at $(date)"
 
 pid1=
 pid2=
+extra_args=
 
 ctrl_c() {
     echo "CTRL-C: cleanup $pid1 and $pid2"
@@ -27,6 +28,7 @@ main() {
         --privacy-budget 1 \
         --sensitivity 0.001 \
         --unsafe-debug-log \
+        ${extra_args} \
         -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
     pid1=$!
     java \
@@ -36,6 +38,7 @@ main() {
         --privacy-budget 1 \
         --sensitivity 0.001 \
         --unsafe-debug-log \
+        ${extra_args} \
         -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
     pid2=$!
     wait
@@ -54,14 +57,22 @@ main() {
 
 if [[ -z "$1" ]]; then
     echo "Usage: "
-    echo "  $0 <test-set>"
+    echo "  $0 [-d] <test-set>"
     echo
     echo "Example: $0 mtcars"
+    echo
+    echo "Optional parameter '-d' activates dummy suite instead of SPDZ."
     echo
     echo "Available test sets:"
     echo "  mtcars"
     echo "  breast_cancer"
     exit 1
+fi
+
+
+if [[ "$1" = "-d" ]]; then
+    shift
+    extra_args="--dummy"
 fi
 
 time main $1
