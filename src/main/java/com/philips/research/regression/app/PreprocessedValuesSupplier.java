@@ -11,6 +11,7 @@ import dk.alexandra.fresco.framework.network.CloseableNetwork;
 import dk.alexandra.fresco.framework.network.Network;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedStrategy;
+import dk.alexandra.fresco.framework.util.AesCtrDrbg;
 import dk.alexandra.fresco.framework.util.Drbg;
 import dk.alexandra.fresco.framework.util.OpenedValueStoreImpl;
 import dk.alexandra.fresco.framework.value.SInt;
@@ -36,7 +37,7 @@ class PreprocessedValuesSupplier {
     private final int numberOfPlayers;
     private final Drbg drbg;
 
-    PreprocessedValuesSupplier(int myId, int numberOfPlayers, NetworkFactory networkFactory, SpdzProtocolSuite protocolSuite, int modBitLength, FieldDefinition definition, Map<Integer, RotList> seedOts, Drbg drbg, FieldElement ssk, int maxBitLength) {
+    PreprocessedValuesSupplier(int myId, int numberOfPlayers, NetworkFactory networkFactory, SpdzProtocolSuite protocolSuite, int modBitLength, FieldDefinition definition, Map<Integer, RotList> seedOts, FieldElement ssk, int maxBitLength) {
         this.pipeNetwork = networkFactory.createExtraNetwork(myId);
         this.tripleSupplier = SpdzMascotDataSupplier.createSimpleSupplier(
             myId,
@@ -45,12 +46,12 @@ class PreprocessedValuesSupplier {
             modBitLength,
             definition,
             null,
-            seedOts, drbg, ssk);
+            seedOts, Random.getDrbg(myId), ssk);
         this.maxBitLength = maxBitLength;
         this.protocolSuite = protocolSuite;
         this.myId = myId;
         this.numberOfPlayers = numberOfPlayers;
-        this.drbg = drbg;
+        this.drbg = Random.getDrbg(myId);
     }
 
     SpdzSInt[] provide(Integer pipeLength) {

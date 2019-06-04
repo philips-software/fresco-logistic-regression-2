@@ -186,7 +186,7 @@ abstract class ApplicationRunner <Output> {
 
 class SpdzRunner <Output> extends ApplicationRunner<Output> {
 
-    private static final int PRG_SEED_LENGTH = 256;
+    static final int PRG_SEED_LENGTH = 256;
     private static final int MAX_BIT_LENGTH = 200;
     private static final int FIXED_POINT_PRECISION = 16;
 
@@ -205,38 +205,20 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
         sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
 
         SpdzOpenedValueStoreImpl store = new SpdzOpenedValueStoreImpl();
-        Drbg drbg = getDrbg(myId);
+        Drbg drbg = Random.getDrbg(myId);
         List<Integer> partyIds = new ArrayList<>(partyMap.keySet());
         Map<Integer, RotList> seedOts = getSeedOts(myId, partyIds, PRG_SEED_LENGTH, drbg, network);
         final BigIntegerFieldDefinition definition = new BigIntegerFieldDefinition(modulus);
         FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(definition, PRG_SEED_LENGTH);
         PreprocessedValuesSupplier preprocessedValuesSupplier
-            = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, drbg, ssk, MAX_BIT_LENGTH);
+            = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, ssk, MAX_BIT_LENGTH);
         SpdzDataSupplier supplier = SpdzMascotDataSupplier.createSimpleSupplier(
             myId, numberOfPlayers,
             () -> networkFactory.createExtraNetwork(myId),
             modBitLength, definition,
             preprocessedValuesSupplier::provide,
             seedOts, drbg, ssk);
-        resourcePool = new SpdzResourcePoolImpl(myId, numberOfPlayers, store, supplier, getDrbg(myId));
-    }
-
-    private Drbg getDrbg(int myId) {
-        // This method was copied from Fresco AbstractSpdzTest
-        byte[] seed = new byte[SpdzRunner.PRG_SEED_LENGTH / 8];
-
-        /* Remark from the FRESCO authors:
-         *
-         * > The joint DRBG needs to be seeded with the same seed for all parties. Seeding it with a 0 byte array there
-         * > instead of one containing the party's ID does the trick.
-         * >
-         * > The above is not secure, but will give you accurate performance results. I've been working on a somewhat
-         * > related issue in a separate branch that will remove the necessity to seed the DRBG manually altogether.
-         * > But at least for the time being, simply removing that line should give you what you need.
-         */
-        // new Random(myId).nextBytes(seed);
-
-        return AesCtrDrbgFactory.fromDerivedSeed(seed);
+        resourcePool = new SpdzResourcePoolImpl(myId, numberOfPlayers, store, supplier, Random.getDrbg(myId));
     }
 
     private Map<Integer, RotList> getSeedOts(int myId, List<Integer> partyIds, int prgSeedLength,
