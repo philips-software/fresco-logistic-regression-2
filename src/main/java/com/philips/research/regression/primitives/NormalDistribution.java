@@ -9,6 +9,8 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import static com.philips.research.regression.primitives.BigIntegerBooleans.FALSE;
+import static com.philips.research.regression.primitives.BigIntegerBooleans.isFalse;
 import static java.math.BigDecimal.valueOf;
 
 class NormalDistribution {
@@ -47,14 +49,4 @@ class NormalDistribution {
         DRes<SReal> v;
     }
 
-    private static BigInteger TRUE = BigInteger.ONE;
-    private static BigInteger FALSE = BigInteger.ZERO;
-
-    private static boolean isTrue(BigInteger i) {
-        return i.compareTo(TRUE) == 0;
-    }
-
-    private static boolean isFalse(BigInteger i) {
-        return !isTrue(i);
-    }
 }
