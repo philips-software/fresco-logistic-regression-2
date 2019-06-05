@@ -1,6 +1,5 @@
 package com.philips.research.regression.app;
 
-import com.philips.research.regression.logging.TimestampedMarker;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.numeric.BuilderFactoryNumeric;
 import dk.alexandra.fresco.framework.builder.numeric.DefaultPreprocessedValues;
@@ -11,7 +10,6 @@ import dk.alexandra.fresco.framework.network.CloseableNetwork;
 import dk.alexandra.fresco.framework.network.Network;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedProtocolEvaluator;
 import dk.alexandra.fresco.framework.sce.evaluator.BatchedStrategy;
-import dk.alexandra.fresco.framework.util.AesCtrDrbg;
 import dk.alexandra.fresco.framework.util.Drbg;
 import dk.alexandra.fresco.framework.util.OpenedValueStoreImpl;
 import dk.alexandra.fresco.framework.value.SInt;
@@ -22,7 +20,6 @@ import dk.alexandra.fresco.suite.spdz.datatypes.SpdzSInt;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzMascotDataSupplier;
 import dk.alexandra.fresco.tools.ot.otextension.RotList;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -59,11 +56,9 @@ class PreprocessedValuesSupplier {
         BuilderFactoryNumeric builderFactory = protocolSuite.init(resourcePool);
         ProtocolBuilderNumeric sequential = builderFactory.createSequential();
         DefaultPreprocessedValues preprocessedValues = new DefaultPreprocessedValues(sequential);
-        TimestampedMarker.log(sequential, "... providing exponentiation series ...");
         DRes<List<DRes<SInt>>> exponentiationSeries =
             preprocessedValues.getExponentiationPipe(pipeLength);
         evaluate(sequential, resourcePool, pipeNetwork);
-        TimestampedMarker.log(sequential, "... done");
         List<SInt> result = unwrap(exponentiationSeries);
         return result.stream().map(i -> (SpdzSInt) i).toArray(SpdzSInt[]::new);
     }
