@@ -13,6 +13,7 @@ import static com.philips.research.regression.primitives.BigIntegerBooleans.FALS
 import static com.philips.research.regression.primitives.BigIntegerBooleans.isFalse;
 import static java.math.BigDecimal.valueOf;
 
+// TODO: attempt with Irwin-Hall algorithm instead of Marsaglia
 class NormalDistribution {
     static Computation<SReal, ProtocolBuilderNumeric> random(int precision) {
         return builder -> builder

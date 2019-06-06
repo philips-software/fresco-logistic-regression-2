@@ -57,7 +57,7 @@ class GammaDistribution {
 
                     state.ok = seq.numeric().open(
                         seq.numeric().mult( // AND
-                            r.leq(minZ, Z),
+                            r.leq(minZ, Z), // TODO: replace by b-trick (condselect)
                             r.leq(minLogU, logU)
                         )
                     );

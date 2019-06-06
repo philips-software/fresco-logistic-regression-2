@@ -31,6 +31,7 @@ public class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilde
             DRes<SReal>[][] a = getElements(matrix);
             for (int j = 0; j < d; j++) {
                 for (int k = 0; k < j; k++) {
+                    // TODO: parallelize
                     for (int i = j; i < d; i++) {
                         a[i][j] = seq.realNumeric().sub(
                             a[i][j],
@@ -39,7 +40,9 @@ public class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilde
                     }
                 }
                 a[j][j] = seq.seq(new RealNumericSqrt(a[j][j]));
+                // TODO: parallelize
                 for (int k = j + 1; k < d; k++) {
+                    // TODO: multiply by 1/a_jj
                     a[k][j] = seq.realNumeric().div(a[k][j], a[j][j]);
                 }
             }
