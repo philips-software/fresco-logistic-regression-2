@@ -37,7 +37,7 @@ class UpdateLearnedModelTest {
 
         beta = run(new UpdateLearnedModelApplication(L, beta, l, null));
 
-        assertEquals(asList(valueOf(33.0), valueOf(-12.0)), beta, 0.005);
+        assertEquals(asList(valueOf(33.0), valueOf(-12.0)), beta, 0.05);
     }
 
     @Test
@@ -53,8 +53,8 @@ class UpdateLearnedModelTest {
 
         beta = run(new UpdateLearnedModelApplication(L, beta, l, new HalfOffDummyNoiseFactory()));
 
-        Assertions.assertEquals(33.0 + 0.5, beta.get(0).doubleValue(), 0.005);
-        Assertions.assertEquals(-12.0 + 0.5, beta.get(1).doubleValue(), 0.005);
+        Assertions.assertEquals(33.0 + 0.5, beta.get(0).doubleValue(), 0.05);
+        Assertions.assertEquals(-12.0 + 0.5, beta.get(1).doubleValue(), 0.05);
     }
 
     private Matrix<BigDecimal> hessian(Matrix<BigDecimal> matrix) {

@@ -9,6 +9,7 @@ import dk.alexandra.fresco.lib.collections.Matrix;
 import dk.alexandra.fresco.lib.real.SReal;
 import dk.alexandra.fresco.lib.real.fixed.SFixed;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -26,6 +27,7 @@ public class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilde
     @Override
     public DRes<Matrix<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
+            DRes<SReal> one = seq.realNumeric().known(new BigDecimal(1));
             Matrix<DRes<SReal>> matrix = input.out();
             int d = matrix.getHeight();
             DRes<SReal>[][] a = getElements(matrix);
@@ -41,9 +43,9 @@ public class Cholesky implements Computation<Matrix<DRes<SReal>>, ProtocolBuilde
                 }
                 a[j][j] = seq.seq(new RealNumericSqrt(a[j][j]));
                 // TODO: parallelize
+                DRes<SReal> ajj_inverse = seq.realNumeric().div(one, a[j][j]);
                 for (int k = j + 1; k < d; k++) {
-                    // TODO: multiply by 1/a_jj
-                    a[k][j] = seq.realNumeric().div(a[k][j], a[j][j]);
+                    a[k][j] = seq.realNumeric().mult(a[k][j], ajj_inverse);
                 }
             }
             convertToLowerTriangularMatrix(seq, a);
