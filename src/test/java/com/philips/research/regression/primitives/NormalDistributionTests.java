@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import static com.philips.research.regression.Runner.run;
 import static java.lang.Math.abs;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Normal Distribution")
@@ -44,7 +45,7 @@ class NormalDistributionTests {
     @Test
     @DisplayName("has a mean of 0")
     void mean() {
-        assertTrue(abs(stats.getAverage()) < 0.01);
+        assertEquals(0, stats.getAverage(), 0.1);
     }
 }
 
@@ -55,7 +56,7 @@ class RandomNormalApplication implements Application<Vector<DRes<BigDecimal>>, P
     @Override
     public DRes<Vector<DRes<BigDecimal>>> buildComputation(ProtocolBuilderNumeric builder) {
         Vector<DRes<SReal>> randomNumbers = new Vector<>();
-        for (int i=0; i<20; i++) {
+        for (int i=0; i<1000; i++) {
             DRes<SReal> random = builder.seq(NormalDistribution.random(PRECISION));
             randomNumbers.add(random);
         }
