@@ -1,12 +1,36 @@
 #!/bin/bash
 
-test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
-
-echo "Started at $(date)"
-
 pid1=
 pid2=
 extra_args=
+
+while [[ "$1" == -* ]]; do
+    if [[ "$1" = "-d" ]]; then
+        extra_args="${extra_args} --dummy"
+    elif [[ "$1" = "-dds" ]]; then
+        extra_args="${extra_args} --dummy-data-supplier"
+    fi
+    shift
+done
+
+if [[ -z "$1" ]]; then
+    echo "Usage: "
+    echo "  $0 [-d] <test-set>"
+    echo
+    echo "Example: $0 mtcars"
+    echo
+    echo "Optional parameter '-d' activates dummy suite instead of SPDZ."
+    echo "Optional parmater '-dds' activates dummy data supplier when using SPDZ (instead of Mascot)."
+    echo
+    echo "Available test sets:"
+    echo "  mtcars"
+    echo "  breast_cancer"
+    exit 1
+fi
+
+test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
+
+echo "Started at $(date)"
 
 ctrl_c() {
     echo "CTRL-C: cleanup $pid1 and $pid2"
@@ -54,25 +78,5 @@ main() {
         echo "Output: ${out1}"
     fi
 }
-
-if [[ -z "$1" ]]; then
-    echo "Usage: "
-    echo "  $0 [-d] <test-set>"
-    echo
-    echo "Example: $0 mtcars"
-    echo
-    echo "Optional parameter '-d' activates dummy suite instead of SPDZ."
-    echo
-    echo "Available test sets:"
-    echo "  mtcars"
-    echo "  breast_cancer"
-    exit 1
-fi
-
-
-if [[ "$1" = "-d" ]]; then
-    shift
-    extra_args="--dummy"
-fi
 
 time main $1

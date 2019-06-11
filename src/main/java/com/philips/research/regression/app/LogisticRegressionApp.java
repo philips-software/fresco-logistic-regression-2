@@ -31,6 +31,7 @@ import dk.alexandra.fresco.suite.spdz.SpdzProtocolSuite;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePool;
 import dk.alexandra.fresco.suite.spdz.SpdzResourcePoolImpl;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzDataSupplier;
+import dk.alexandra.fresco.suite.spdz.storage.SpdzDummyDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzMascotDataSupplier;
 import dk.alexandra.fresco.suite.spdz.storage.SpdzOpenedValueStoreImpl;
 import dk.alexandra.fresco.tools.ot.base.DummyOt;
@@ -107,6 +108,13 @@ public class LogisticRegressionApp implements Callable<Void> {
         description = "Evaluates using dummy arithmetic instead of real MPC with SPDZ"
     )
     private boolean dummyArithmetic;
+    @Option(
+        names = {"--dummy-data-supplier"},
+        defaultValue = "false",
+        description = "When using SPDZ, use this to use dummy data supplier instead of Mascot data supplier"
+    )
+    private boolean dummyDataSupplier;
+
 
     public static void main(String[] args) {
         CommandLine.call(new LogisticRegressionApp(), args);
@@ -135,7 +143,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         if (dummyArithmetic) {
             return new DummyRunner<>(myId, partyMap);
         } else {
-            return new SpdzRunner<>(myId, partyMap);
+            return new SpdzRunner<>(myId, partyMap, dummyDataSupplier);
         }
     }
 
@@ -193,7 +201,7 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
     private SecureComputationEngineImpl<SpdzResourcePool, ProtocolBuilderNumeric> sce;
     private SpdzResourcePoolImpl resourcePool;
 
-    SpdzRunner(int myId, Map<Integer, Party> partyMap) {
+    SpdzRunner(int myId, Map<Integer, Party> partyMap, Boolean dummyDataSupplier) {
         super(myId, partyMap);
         int numberOfPlayers = partyMap.size();
 
@@ -205,20 +213,26 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
         sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
 
         SpdzOpenedValueStoreImpl store = new SpdzOpenedValueStoreImpl();
-        Drbg drbg = Random.getDrbg(myId);
-        List<Integer> partyIds = new ArrayList<>(partyMap.keySet());
-        Map<Integer, RotList> seedOts = getSeedOts(myId, partyIds, PRG_SEED_LENGTH, drbg, network);
         final BigIntegerFieldDefinition definition = new BigIntegerFieldDefinition(modulus);
-        FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(definition, PRG_SEED_LENGTH);
-        PreprocessedValuesSupplier preprocessedValuesSupplier
-            = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, ssk, MAX_BIT_LENGTH);
-        SpdzDataSupplier supplier = SpdzMascotDataSupplier.createSimpleSupplier(
-            myId, numberOfPlayers,
-            () -> networkFactory.createExtraNetwork(myId),
-            modBitLength, definition,
-            preprocessedValuesSupplier::provide,
-            seedOts, drbg, ssk);
-        resourcePool = new SpdzResourcePoolImpl(myId, numberOfPlayers, store, supplier, Random.getDrbg(myId));
+        if (!dummyDataSupplier) {
+            Drbg drbg = Random.getDrbg(myId);
+            List<Integer> partyIds = new ArrayList<>(partyMap.keySet());
+            Map<Integer, RotList> seedOts = getSeedOts(myId, partyIds, PRG_SEED_LENGTH, drbg, network);
+            FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(definition, PRG_SEED_LENGTH);
+            PreprocessedValuesSupplier preprocessedValuesSupplier
+                = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, ssk, MAX_BIT_LENGTH);
+            SpdzDataSupplier supplier = SpdzMascotDataSupplier.createSimpleSupplier(
+                myId, numberOfPlayers,
+                () -> networkFactory.createExtraNetwork(myId),
+                modBitLength, definition,
+                preprocessedValuesSupplier::provide,
+                seedOts, drbg, ssk);
+            resourcePool = new SpdzResourcePoolImpl(myId, numberOfPlayers, store, supplier, Random.getDrbg(myId));
+        } else {
+            SpdzDataSupplier supplier = new SpdzDummyDataSupplier(myId, partyMap.size(), definition,
+                new BigInteger(modulus.bitLength(), new java.util.Random(0)).mod(modulus));
+            resourcePool = new SpdzResourcePoolImpl(myId, partyMap.size(), store, supplier, new AesCtrDrbg());
+        }
     }
 
     private Map<Integer, RotList> getSeedOts(int myId, List<Integer> partyIds, int prgSeedLength,
