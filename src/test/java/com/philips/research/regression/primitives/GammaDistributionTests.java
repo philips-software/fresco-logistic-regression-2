@@ -69,13 +69,12 @@ class RandomGammaApplication implements Application<Vector<DRes<BigDecimal>>, Pr
 
     static final double SHAPE = 9;
     static final double SCALE = 0.5;
-    private static final int PRECISION = 32;
 
     @Override
     public DRes<Vector<DRes<BigDecimal>>> buildComputation(ProtocolBuilderNumeric builder) {
         Vector<DRes<SReal>> randomNumbers = new Vector<>();
         for (int i=0; i<20; i++) {
-            DRes<SReal> random = builder.seq(GammaDistribution.random(SHAPE, SCALE, PRECISION));
+            DRes<SReal> random = builder.seq(GammaDistribution.random(SHAPE, SCALE, builder.getRealNumericContext().getPrecision()));
             randomNumbers.add(random);
         }
         return builder.realLinAlg().openVector(() -> randomNumbers);
