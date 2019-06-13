@@ -259,7 +259,7 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
 
     @Override
     public Output run(Application<Output, ProtocolBuilderNumeric> application) {
-        Duration timeout = Duration.ofHours(24);
+        Duration timeout = Duration.ofDays(365);
         return sce.runApplication(application, resourcePool, network, timeout);
     }
 
