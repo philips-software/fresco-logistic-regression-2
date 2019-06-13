@@ -34,7 +34,11 @@ class GammaDistribution {
 
                     DRes<SReal> Z = seq.seq(NormalDistribution.random(precision));
                     DRes<SReal> minZ = r.known(valueOf(-1. / c));
-                    Z = seq.seq(new ConditionalSelect(r.leq(minZ, Z), Z, r.known(valueOf(0)))); // Z = condselect(Z>-1/c, Z, 0)
+
+                    // Select a dummy value for Z when the condition Z>-1/c is not met.
+                    // Since we're allowed to open the condition, we could also introduce a nested while loop here that
+                    // takes a random Z until the condition is met. We'll leave that as a future optimization.
+                    Z = seq.seq(new ConditionalSelect(r.leq(minZ, Z), Z, r.known(valueOf(0))));
 
                     DRes<SReal> U = seq.seq(UniformDistribution.random(precision));
                     DRes<SReal> quberootV = r.add(ONE, r.mult(valueOf(c), Z));
@@ -60,7 +64,7 @@ class GammaDistribution {
 
                     state.ok = seq.numeric().open(
                         seq.numeric().mult( // AND
-                            r.leq(minZ, Z), // TODO: replace by b-trick (condselect)
+                            r.leq(minZ, Z),
                             r.leq(minLogU, logU)
                         )
                     );
