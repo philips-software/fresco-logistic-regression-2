@@ -16,6 +16,8 @@ import static java.math.BigDecimal.valueOf;
 
 class GammaDistribution {
     static Computation<SReal, ProtocolBuilderNumeric> random(double shape, double scale, int precision) {
+        // Implements https://www.hongliangjie.com/2012/12/19/how-to-generate-gamma-random-variables/
+
         assert(shape >= 1);
         double d = shape - 1./3.;
         double c = 1. / sqrt(9. * d);
@@ -32,6 +34,7 @@ class GammaDistribution {
 
                     DRes<SReal> Z = seq.seq(NormalDistribution.random(precision));
                     DRes<SReal> minZ = r.known(valueOf(-1. / c));
+                    Z = seq.seq(new ConditionalSelect(r.leq(minZ, Z), Z, r.known(valueOf(0)))); // Z = condselect(Z>-1/c, Z, 0)
 
                     DRes<SReal> U = seq.seq(UniformDistribution.random(precision));
                     DRes<SReal> quberootV = r.add(ONE, r.mult(valueOf(c), Z));
