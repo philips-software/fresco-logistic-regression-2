@@ -72,7 +72,7 @@ class GammaDistribution {
                 }
             ).seq((seq, state) -> {
                 RealNumeric r = seq.realNumeric();
-                return r.div(r.mult(valueOf(d), state.V), valueOf(scale));
+                return r.mult(valueOf(scale), r.mult(valueOf(d), state.V));
             });
     }
 
