@@ -16,6 +16,7 @@ import java.util.Vector;
 import static com.philips.research.regression.Runner.run;
 import static com.philips.research.regression.primitives.RandomGammaApplication.*;
 import static java.lang.Math.abs;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Gamma Distribution")
@@ -60,7 +61,7 @@ class GammaDistributionTests {
     @Test
     @DisplayName("has correct mean")
     void mean() {
-        assertTrue(abs(MEAN - stats.getAverage()) < 0.01);
+        assertEquals(MEAN,  stats.getAverage(), 0.01);
     }
 }
 
