@@ -65,7 +65,7 @@ class GammaDistribution {
                     state.ok = seq.numeric().open(
                         seq.numeric().mult( // AND
                             r.leq(minZ, Z),
-                            r.leq(minLogU, logU)
+                            r.leq(logU, minLogU)
                         )
                     );
                     return () -> state;
