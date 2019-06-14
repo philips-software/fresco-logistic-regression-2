@@ -24,12 +24,12 @@ import static java.math.BigDecimal.valueOf;
 
  */
 
-public class DPNoise implements NoiseFactory {
+public class DPNoiseFactory implements NoiseFactory {
     private final BigDecimal epsilon;
     private final BigDecimal lambda;
     private int length;
 
-    public DPNoise(BigDecimal epsilon, BigDecimal lambda, int length) {
+    public DPNoiseFactory(BigDecimal epsilon, BigDecimal lambda, int length) {
         this.epsilon = epsilon;
         this.lambda = lambda;
         this.length = length;
