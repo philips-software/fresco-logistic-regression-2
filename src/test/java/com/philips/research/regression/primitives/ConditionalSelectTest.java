@@ -52,3 +52,4 @@ class SelectApplication implements Application<BigDecimal, ProtocolBuilderNumeri
         return builder.realNumeric().open(closedResult);
     }
 }
+

@@ -26,7 +26,8 @@ class GammaDistributionTests {
 
     @BeforeAll
     static void setUp() {
-        stats = run(new RandomGammaApplication()).stream()
+        stats = run(new RandomGammaApplication())
+            .stream()
             .map(DRes::out)
             .mapToDouble(BigDecimal::doubleValue)
             .summaryStatistics();
