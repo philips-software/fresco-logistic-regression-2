@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.Vector;
 
 import static com.philips.research.regression.logging.TimestampedMarker.log;
+import static java.math.BigDecimal.valueOf;
 
 public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> L;
@@ -24,13 +25,15 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
                               DRes<Vector<DRes<SReal>>> l,
                               BigDecimal epsilon,
                               BigDecimal sensitivity,
-                              BigDecimal lambda) {
+                              BigDecimal lambda,
+                              int numParties,
+                              int numberOfInputs) {
         this.L = L;
         this.beta = beta;
         this.l = l;
         this.noiseFactory = epsilon != null
 //            ? new LaplaceNoiseFactory(epsilon, sensitivity)
-            ? new DPNoiseFactory(epsilon, lambda, L.out().getHeight())
+            ? new DPNoiseFactory(epsilon.divide(valueOf(numParties)), lambda, beta.out().size(), numberOfInputs, numParties)
             : null;
     }
 

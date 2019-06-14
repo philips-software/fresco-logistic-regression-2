@@ -56,12 +56,13 @@ public class DPNoiseTest {
 class DPNoiseTestApp implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
     @Override
     public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
-        BigDecimal[] inputs = new BigDecimal[200];
-        for (int i = 0; i < 200; ++i) {
+        int numInputs = 200;
+        BigDecimal[] inputs = new BigDecimal[numInputs];
+        for (int i = 0; i < inputs.length; ++i) {
             inputs[i] = valueOf(0);
         }
         DRes<Vector<DRes<SReal>>> closedInputs = builder.realLinAlg().input(new Vector<>(Arrays.asList(inputs)), 1);
-        DRes<Vector<DRes<SReal>>> result = builder.seq(new DPNoiseGenerator(closedInputs, valueOf(1.0 / 5.0), valueOf(1), 100));
+        DRes<Vector<DRes<SReal>>> result = builder.seq(new DPNoiseGenerator(closedInputs, valueOf(1.0 / 5.0), valueOf(1), 10, numInputs));
         DRes<Vector<DRes<BigDecimal>>> opened = builder.realLinAlg().openVector(result);
         return () -> unwrap(opened);
     }
