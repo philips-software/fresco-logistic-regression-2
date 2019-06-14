@@ -158,7 +158,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
 
                 lprime = seq.par(new SubtractVectors(lprime, seq.par(new ScaleVector(valueOf(lambda), beta))));
                 log(seq, "    update learned model");
-                return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, sensitivity));
+                return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, sensitivity, valueOf(lambda)));
             });
         }
     }

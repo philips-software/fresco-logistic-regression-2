@@ -19,13 +19,18 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
     private final DRes<Vector<DRes<SReal>>> l;
     private final NoiseFactory noiseFactory;
 
-    public UpdateLearnedModel(DRes<Matrix<DRes<SReal>>> L, DRes<Vector<DRes<SReal>>> beta, DRes<Vector<DRes<SReal>>> l,
-                              BigDecimal epsilon, BigDecimal sensitivity) {
+    public UpdateLearnedModel(DRes<Matrix<DRes<SReal>>> L,
+                              DRes<Vector<DRes<SReal>>> beta,
+                              DRes<Vector<DRes<SReal>>> l,
+                              BigDecimal epsilon,
+                              BigDecimal sensitivity,
+                              BigDecimal lambda) {
         this.L = L;
         this.beta = beta;
         this.l = l;
         this.noiseFactory = epsilon != null
-            ? new LaplaceNoiseFactory(epsilon, sensitivity)
+//            ? new LaplaceNoiseFactory(epsilon, sensitivity)
+            ? new DPNoiseFactory(epsilon, lambda, L.out().getHeight())
             : null;
     }
 
