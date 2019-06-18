@@ -3,7 +3,6 @@ package com.philips.research.regression.primitives;
 import com.philips.research.regression.util.AddVectors;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
-import dk.alexandra.fresco.framework.builder.ComputationParallel;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
 import dk.alexandra.fresco.lib.real.SReal;
 
@@ -45,7 +44,7 @@ public class DPNoiseFactory implements NoiseFactory {
     public Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> createNoiseGenerator(DRes<Vector<DRes<SReal>>> input) {
         return new TotalNTimes(
             numParties,
-            () -> new DPNoiseGenerator(input, epsilon, lambda, numVars, numberOfInputs));
+            () -> new DPNoiseGenerator(epsilon, lambda, numVars, numberOfInputs));
     }
 }
 
@@ -76,14 +75,12 @@ class TotalNTimes implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNum
 }
 
 class DPNoiseGenerator implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
-    private final DRes<Vector<DRes<SReal>>> input;
     private final BigDecimal epsilon;
     private final BigDecimal lambda;
     private final int numVars;
     private final int numberOfInputs;
 
-    public DPNoiseGenerator(DRes<Vector<DRes<SReal>>> input, BigDecimal epsilon, BigDecimal lambda, int numVars, int numberOfInputs) {
-        this.input = input;
+    public DPNoiseGenerator(BigDecimal epsilon, BigDecimal lambda, int numVars, int numberOfInputs) {
         this.epsilon = epsilon;
         this.lambda = lambda;
         this.numVars = numVars;
