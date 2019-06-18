@@ -102,11 +102,11 @@ class DPNoiseGenerator implements Computation<Vector<DRes<SReal>>, ProtocolBuild
             DRes<SReal> square = builder.realNumeric().mult(rand, rand);
             sumOfSquares = builder.realNumeric().add(sumOfSquares, square);
         }
+
         DRes<SReal> norm = builder.seq(new RealNumericSqrt(sumOfSquares));
-        DRes<SReal> normInverse = builder.realNumeric().div(builder.realNumeric().known(valueOf(1)), norm);
-        DRes<SReal> normInverseTimesNoiseLen = builder.realNumeric().mult(normInverse, noiseLen);
+        DRes<SReal> noiseLenDividedByNorm = builder.realNumeric().div(noiseLen, norm);
         for (int i = 0; i < numVars; ++i) {
-            DRes<SReal> scaled = builder.realNumeric().mult(noise.get(i), normInverseTimesNoiseLen);
+            DRes<SReal> scaled = builder.realNumeric().mult(noise.get(i), noiseLenDividedByNorm);
             noise.set(i, scaled);
         }
 
