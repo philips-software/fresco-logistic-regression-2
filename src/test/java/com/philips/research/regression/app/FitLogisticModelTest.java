@@ -26,19 +26,25 @@ import static java.util.Arrays.fill;
 @DisplayName("Logistic Regression")
 class FitLogisticModelTest {
 
+    private static BigDecimal intercept = valueOf(1.65707);
+    private static BigDecimal beta_hp = valueOf(0.00968555);
+    private static BigDecimal beta_wt = valueOf(-1.17481);
+
     @Test
     @DisplayName("performs logistic regression")
     void fitsLogisticModel() {
-        BigDecimal intercept = valueOf(1.65707);
-        BigDecimal beta_hp = valueOf(0.00968555);
-        BigDecimal beta_wt = valueOf(-1.17481);
-
-        List<Matrix<BigDecimal>> Xs = asList(X1, X2);
-        List<Vector<BigDecimal>> Ys = asList(am1, am2);
-
-        List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 5), 2);
-
+        List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 5, null), 2);
         assertEquals(asList(beta_hp, beta_wt, intercept), beta, 0.001);
+    }
+
+    @Test
+    @DisplayName("performs logistic regression with differential privacy")
+    void fitsLogisticModelWithDifferentialPrivacy() {
+        BigDecimal privacyBudget = valueOf(1000);
+        List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 5, privacyBudget), 2);
+        System.out.println(asList(beta_hp, beta_wt, intercept));
+        System.out.println(beta);
+        assertEquals(asList(beta_hp, beta_wt, intercept), beta, 0.1);
     }
 
     private static BigDecimal[] ones;
@@ -50,6 +56,8 @@ class FitLogisticModelTest {
     private static Matrix<BigDecimal> X1 = transpose(matrix(hp1, wt1, ones));
     private static Matrix<BigDecimal> X2 = transpose(matrix(hp2, wt2, ones));
 
+    private static List<Matrix<BigDecimal>> Xs = asList(X1, X2);
+    private static List<Vector<BigDecimal>> Ys = asList(am1, am2);
 }
 
 class FitLogisticModelApplication implements Application<List<BigDecimal>, ProtocolBuilderNumeric> {
@@ -58,12 +66,14 @@ class FitLogisticModelApplication implements Application<List<BigDecimal>, Proto
     private List<Vector<BigDecimal>> Ys;
     private double lambda;
     private int numberOfIterations;
+    private BigDecimal privacyBudget;
 
-    FitLogisticModelApplication(List<Matrix<BigDecimal>> Xs, List<Vector<BigDecimal>> Ys, double lambda, int numberOfIterations) {
+    FitLogisticModelApplication(List<Matrix<BigDecimal>> Xs, List<Vector<BigDecimal>> Ys, double lambda, int numberOfIterations, BigDecimal privacyBudget) {
         this.Xs = Xs;
         this.Ys = Ys;
         this.lambda = lambda;
         this.numberOfIterations = numberOfIterations;
+        this.privacyBudget = privacyBudget;
     }
 
     @Override
@@ -79,7 +89,7 @@ class FitLogisticModelApplication implements Application<List<BigDecimal>, Proto
             Matrix<BigDecimal> myX = Xs.get(seq.getBasicNumericContext().getMyId() - 1);
             Vector<BigDecimal> myY = Ys.get(seq.getBasicNumericContext().getMyId() - 1);
 
-            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, lambda, numberOfIterations, myX, myY));
+            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, lambda, numberOfIterations, myX, myY, privacyBudget));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
 
             return () -> unwrap(opened);
