@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Vector;
@@ -21,13 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Meilof DPNoise")
-public class DPNoiseTest {
-    List<BigDecimal> noiseVector;
-    DoubleSummaryStatistics stats;
+class DPNoiseTest {
+    private DoubleSummaryStatistics stats;
 
     @BeforeEach
     void setUp() {
-        noiseVector = run(new DPNoiseTestApp());
+        List<BigDecimal> noiseVector = run(new DPNoiseTestApp());
         stats = noiseVector
             .stream()
             .mapToDouble(BigDecimal::doubleValue)
@@ -36,19 +34,19 @@ public class DPNoiseTest {
 
     @Test
     @DisplayName("mean is close to zero")
-    public void meanIsCloseToZero() {
+    void meanIsCloseToZero() {
         assertEquals(0.0, stats.getAverage(), 0.1);
     }
 
     @Test
     @DisplayName("it has negative values")
-    public void hasNegativeValues() {
+    void hasNegativeValues() {
         assertTrue(stats.getMin() < 0);
     }
 
     @Test
     @DisplayName("it has positive values")
-    public void hasPositiveValues() {
+    void hasPositiveValues() {
         assertTrue(stats.getMax() > 0);
     }
 }

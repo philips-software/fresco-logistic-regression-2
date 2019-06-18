@@ -4,6 +4,7 @@ import com.philips.research.regression.util.AddVectors;
 import dk.alexandra.fresco.framework.DRes;
 import dk.alexandra.fresco.framework.builder.Computation;
 import dk.alexandra.fresco.framework.builder.numeric.ProtocolBuilderNumeric;
+import dk.alexandra.fresco.lib.real.RealNumeric;
 import dk.alexandra.fresco.lib.real.SReal;
 
 import java.math.BigDecimal;
@@ -32,7 +33,7 @@ public class DPNoiseFactory implements NoiseFactory {
     private final int numberOfInputs;
     private final int numParties;
 
-    public DPNoiseFactory(BigDecimal epsilon, BigDecimal lambda, int numVars, int numberOfInputs, int numParties) {
+    DPNoiseFactory(BigDecimal epsilon, BigDecimal lambda, int numVars, int numberOfInputs, int numParties) {
         this.epsilon = epsilon;
         this.lambda = lambda;
         this.numVars = numVars;
@@ -80,7 +81,7 @@ class DPNoiseGenerator implements Computation<Vector<DRes<SReal>>, ProtocolBuild
     private final int numVars;
     private final int numberOfInputs;
 
-    public DPNoiseGenerator(BigDecimal epsilon, BigDecimal lambda, int numVars, int numberOfInputs) {
+    DPNoiseGenerator(BigDecimal epsilon, BigDecimal lambda, int numVars, int numberOfInputs) {
         this.epsilon = epsilon;
         this.lambda = lambda;
         this.numVars = numVars;
@@ -89,24 +90,24 @@ class DPNoiseGenerator implements Computation<Vector<DRes<SReal>>, ProtocolBuild
 
     @Override
     public DRes<Vector<DRes<SReal>>> buildComputation(ProtocolBuilderNumeric builder) {
-        int len = numberOfInputs;
-        double shape = numVars;
-        double scale = 2.0 / (len * epsilon.doubleValue() * lambda.doubleValue());
-        DRes<SReal> noiseLen = builder.seq(GammaDistribution.random(shape, scale, builder.getRealNumericContext().getPrecision()));
+        RealNumeric r = builder.realNumeric();
+        int precision = builder.getRealNumericContext().getPrecision();
+        double scale = 2.0 / (numberOfInputs * epsilon.doubleValue() * lambda.doubleValue());
+        DRes<SReal> noiseLen = builder.seq(GammaDistribution.random(numVars, scale, precision));
 
         Vector<DRes<SReal>> noise = new Vector<>();
-        DRes<SReal> sumOfSquares = builder.realNumeric().known(valueOf(0));
+        DRes<SReal> sumOfSquares = r.known(valueOf(0));
         for (int i = 0; i < numVars; ++i) {
-            DRes<SReal> rand = builder.seq(NormalDistribution.random(builder.getRealNumericContext().getPrecision()));
+            DRes<SReal> rand = builder.seq(NormalDistribution.random(precision));
             noise.add(rand);
-            DRes<SReal> square = builder.realNumeric().mult(rand, rand);
-            sumOfSquares = builder.realNumeric().add(sumOfSquares, square);
+            DRes<SReal> square = r.mult(rand, rand);
+            sumOfSquares = r.add(sumOfSquares, square);
         }
 
         DRes<SReal> norm = builder.seq(new RealNumericSqrt(sumOfSquares));
-        DRes<SReal> noiseLenDividedByNorm = builder.realNumeric().div(noiseLen, norm);
+        DRes<SReal> noiseLenDividedByNorm = r.div(noiseLen, norm);
         for (int i = 0; i < numVars; ++i) {
-            DRes<SReal> scaled = builder.realNumeric().mult(noise.get(i), noiseLenDividedByNorm);
+            DRes<SReal> scaled = r.mult(noise.get(i), noiseLenDividedByNorm);
             noise.set(i, scaled);
         }
 
