@@ -42,8 +42,6 @@ class FitLogisticModelTest {
     void fitsLogisticModelWithDifferentialPrivacy() {
         BigDecimal privacyBudget = valueOf(1000);
         List<BigDecimal> beta = run(new FitLogisticModelApplication(Xs, Ys, 1.0, 5, privacyBudget), 2);
-        System.out.println(asList(beta_hp, beta_wt, intercept));
-        System.out.println(beta);
         assertEquals(asList(beta_hp, beta_wt, intercept), beta, 0.1);
     }
 
