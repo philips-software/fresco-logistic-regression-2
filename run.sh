@@ -50,7 +50,6 @@ main() {
         -p1:localhost:8871 \
         -p2:localhost:8872 \
         --privacy-budget 1 \
-        --sensitivity 0.001 \
         --unsafe-debug-log \
         ${extra_args} \
         -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
@@ -60,7 +59,6 @@ main() {
         -p1:localhost:8871 \
         -p2:localhost:8872 \
         --privacy-budget 1 \
-        --sensitivity 0.001 \
         --unsafe-debug-log \
         ${extra_args} \
         -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
