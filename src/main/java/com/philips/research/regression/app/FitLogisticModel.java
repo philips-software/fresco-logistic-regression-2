@@ -28,7 +28,6 @@ import static java.util.Collections.nCopies;
 
 public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final List<DRes<Matrix<DRes<SReal>>>> Xs;
-    private final List<DRes<Vector<DRes<SReal>>>> Ys;
     private final double lambda;
     private final int numberOfIterations;
     private final Matrix<BigDecimal> myX;
@@ -36,11 +35,10 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     private final BigDecimal privacyBudget;
     private final BigDecimal sensitivity;
 
-    public FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs, List<DRes<Vector<DRes<SReal>>>> Ys,
-                            double lambda, int numberOfIterations,
-                            Matrix<BigDecimal> myX, Vector<BigDecimal> myY) {
+    FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs,
+                     double lambda, int numberOfIterations,
+                     Matrix<BigDecimal> myX, Vector<BigDecimal> myY) {
         this.Xs = Xs;
-        this.Ys = Ys;
         this.lambda = lambda;
         this.numberOfIterations = numberOfIterations;
         this.myX = myX;
@@ -49,12 +47,11 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         this.sensitivity = null;
     }
 
-    public FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs, List<DRes<Vector<DRes<SReal>>>> Ys,
-                            double lambda, int numberOfIterations,
-                            Matrix<BigDecimal> myX, Vector<BigDecimal> myY,
-                            BigDecimal privacyBudget, BigDecimal sensitivity) {
+    FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs,
+                     double lambda, int numberOfIterations,
+                     Matrix<BigDecimal> myX, Vector<BigDecimal> myY,
+                     BigDecimal privacyBudget, BigDecimal sensitivity) {
         this.Xs = Xs;
-        this.Ys = Ys;
         this.lambda = lambda;
         this.numberOfIterations = numberOfIterations;
         this.myX = myX;
@@ -139,8 +136,6 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 DRes<Vector<DRes<SReal>>> lprime = null;
                 for (int party=1; party<=Xs.size(); party++) {
                     log(seq, "    logLikelihoodPrime " + party);
-                    DRes<Matrix<DRes<SReal>>> X = Xs.get(party - 1);
-                    DRes<Vector<DRes<SReal>>> Y = Ys.get(party - 1);
                     DRes<Vector<DRes<SReal>>> logLikelihoodPrime;
                     if (party == builder.getBasicNumericContext().getMyId()) {
                         Vector<BigDecimal> localLogLikelihoodPrime = new LocalLogLikelihoodPrime(myX, myY, unwrappedBeta).compute();

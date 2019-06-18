@@ -70,24 +70,16 @@ class FitLogisticModelApplication implements Application<List<BigDecimal>, Proto
     public DRes<List<BigDecimal>> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
             List<DRes<Matrix<DRes<SReal>>>> closedXs = new ArrayList<>();
-            List<DRes<Vector<DRes<SReal>>>> closedYs = new ArrayList<>();
-
             for (int party = 1; party <= Xs.size(); party++) {
                 Matrix<BigDecimal> X = Xs.get(party - 1);
                 DRes<Matrix<DRes<SReal>>> closedX = seq.realLinAlg().input(X, party);
                 closedXs.add(closedX);
             }
 
-            for (int party = 1; party <= Ys.size(); party++) {
-                Vector<BigDecimal> Y = Ys.get(party - 1);
-                DRes<Vector<DRes<SReal>>> closedY = seq.realLinAlg().input(Y, party);
-                closedYs.add(closedY);
-            }
-
             Matrix<BigDecimal> myX = Xs.get(seq.getBasicNumericContext().getMyId() - 1);
             Vector<BigDecimal> myY = Ys.get(seq.getBasicNumericContext().getMyId() - 1);
 
-            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, numberOfIterations, myX, myY));
+            DRes<Vector<DRes<SReal>>> result = seq.seq(new FitLogisticModel(closedXs, lambda, numberOfIterations, myX, myY));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
 
             return () -> unwrap(opened);

@@ -71,11 +71,10 @@ class LogisticRegression implements Application<List<BigDecimal>, ProtocolBuilde
             return () -> new Pair<>(closedXs, closedYs);
         }).seq((seq, inputs) -> {
             List<DRes<Matrix<DRes<SReal>>>> closedXs = inputs.getFirst();
-            List<DRes<Vector<DRes<SReal>>>> closedYs = inputs.getSecond();
 
             DRes<Vector<DRes<SReal>>> result = privacyBudget > 0
-                ? seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations, matrix, vector, valueOf(privacyBudget), valueOf(sensitivity)))
-                : seq.seq(new FitLogisticModel(closedXs, closedYs, lambda, iterations, matrix, vector));
+                ? seq.seq(new FitLogisticModel(closedXs, lambda, iterations, matrix, vector, valueOf(privacyBudget), valueOf(sensitivity)))
+                : seq.seq(new FitLogisticModel(closedXs, lambda, iterations, matrix, vector));
             DRes<Vector<DRes<BigDecimal>>> opened = seq.realLinAlg().openVector(result);
             return () -> unwrap(opened);
         });
