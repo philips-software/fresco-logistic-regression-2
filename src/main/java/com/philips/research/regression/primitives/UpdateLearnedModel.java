@@ -32,7 +32,6 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
         this.beta = beta;
         this.l = l;
         this.noiseFactory = epsilon != null
-//            ? new LaplaceNoiseFactory(epsilon, sensitivity)
             ? new DPNoiseFactory(epsilon.divide(valueOf(numParties), 15 , HALF_UP), lambda, beta.out().size(), numberOfInputs, numParties)
             : null;
     }
