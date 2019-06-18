@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import static com.philips.research.regression.logging.TimestampedMarker.log;
 import static java.math.BigDecimal.valueOf;
+import static java.math.RoundingMode.HALF_UP;
 
 public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, ProtocolBuilderNumeric> {
     private final DRes<Matrix<DRes<SReal>>> L;
@@ -33,7 +34,7 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
         this.l = l;
         this.noiseFactory = epsilon != null
 //            ? new LaplaceNoiseFactory(epsilon, sensitivity)
-            ? new DPNoiseFactory(epsilon.divide(valueOf(numParties)), lambda, beta.out().size(), numberOfInputs, numParties)
+            ? new DPNoiseFactory(epsilon.divide(valueOf(numParties), 15 , HALF_UP), lambda, beta.out().size(), numberOfInputs, numParties)
             : null;
     }
 
