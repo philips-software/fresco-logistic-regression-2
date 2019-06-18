@@ -91,12 +91,6 @@ public class LogisticRegressionApp implements Callable<Void> {
     )
     private double privacyBudget;
     @Option(
-        names = {"--sensitivity", "-s"},
-        defaultValue = "0",
-        description = "Determines the sensitivity parameter used for differential privacy. If omitted, it is 1 divided by the number of rows in the input data."
-    )
-    private double sensitivity;
-    @Option(
         names = {"--unsafe-debug-log"},
         defaultValue = "false",
         description = "Enables debug logging. ⚠️ Warning: exposes secret values in order to log them! ⚠️"
@@ -129,7 +123,7 @@ public class LogisticRegressionApp implements Callable<Void> {
         Matrix<BigDecimal> m = map(matrix(input.predictors), BigDecimal::valueOf);
         Vector<BigDecimal> v = vectorOf(input.outcomes);
 
-        LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations, privacyBudget, sensitivity);
+        LogisticRegression frescoApp = new LogisticRegression(myId, m, v, lambda, iterations, privacyBudget);
         ApplicationRunner<List<BigDecimal>> runner = createRunner(myId, createPartyMap());
 
         List<BigDecimal> result = runner.run(frescoApp);

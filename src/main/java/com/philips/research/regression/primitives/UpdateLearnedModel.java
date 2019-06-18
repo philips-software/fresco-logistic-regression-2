@@ -25,7 +25,6 @@ public class UpdateLearnedModel implements Computation<Vector<DRes<SReal>>, Prot
                               DRes<Vector<DRes<SReal>>> beta,
                               DRes<Vector<DRes<SReal>>> l,
                               BigDecimal epsilon,
-                              BigDecimal sensitivity,
                               BigDecimal lambda,
                               int numParties,
                               int numberOfInputs) {

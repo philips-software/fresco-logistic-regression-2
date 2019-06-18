@@ -33,7 +33,6 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
     private final Matrix<BigDecimal> myX;
     private final Vector<BigDecimal> myY;
     private final BigDecimal privacyBudget;
-    private final BigDecimal sensitivity;
 
     FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs,
                      double lambda, int numberOfIterations,
@@ -44,20 +43,18 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         this.myX = myX;
         this.myY = myY;
         this.privacyBudget = null;
-        this.sensitivity = null;
     }
 
     FitLogisticModel(List<DRes<Matrix<DRes<SReal>>>> Xs,
                      double lambda, int numberOfIterations,
                      Matrix<BigDecimal> myX, Vector<BigDecimal> myY,
-                     BigDecimal privacyBudget, BigDecimal sensitivity) {
+                     BigDecimal privacyBudget) {
         this.Xs = Xs;
         this.lambda = lambda;
         this.numberOfIterations = numberOfIterations;
         this.myX = myX;
         this.myY = myY;
         this.privacyBudget = privacyBudget;
-        this.sensitivity = sensitivity;
     }
 
     @Override
@@ -73,7 +70,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 : null;
             for (int i=0; i<numberOfIterations; i++) {
                 log(seq, "Iteration " + i);
-                beta = seq.seq(new SingleIteration(beta, L, myX, myY, epsilon, sensitivity));
+                beta = seq.seq(new SingleIteration(beta, L, myX, myY, epsilon));
             }
 
             return beta;
@@ -112,17 +109,15 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
         private final Matrix<BigDecimal> myX;
         private final Vector<BigDecimal> myY;
         private final BigDecimal epsilon;
-        private final BigDecimal sensitivity;
 
         private SingleIteration(DRes<Vector<DRes<SReal>>> initialBeta, DRes<Matrix<DRes<SReal>>> L,
                                 Matrix<BigDecimal> myX, Vector<BigDecimal> myY,
-                                BigDecimal epsilon, BigDecimal sensitivity) {
+                                BigDecimal epsilon) {
             this.beta = initialBeta;
             this.L = L;
             this.myX = myX;
             this.myY = myY;
             this.epsilon = epsilon;
-            this.sensitivity = sensitivity;
         }
 
         @Override
@@ -154,7 +149,7 @@ public class FitLogisticModel implements Computation<Vector<DRes<SReal>>, Protoc
                 lprime = seq.par(new SubtractVectors(lprime, seq.par(new ScaleVector(valueOf(lambda), beta))));
                 log(seq, "    update learned model");
 
-                return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, sensitivity, valueOf(lambda), Xs.size(), Xs.get(0).out().getHeight() * Xs.size()));
+                return seq.seq(new UpdateLearnedModel(L, beta, lprime, epsilon, valueOf(lambda), Xs.size(), Xs.get(0).out().getHeight() * Xs.size()));
             });
         }
     }
