@@ -10,6 +10,7 @@ import dk.alexandra.fresco.lib.real.SReal;
 import java.math.BigDecimal;
 import java.util.Vector;
 
+import static com.philips.research.regression.logging.TimestampedMarker.log;
 import static java.math.BigDecimal.valueOf;
 
 /* Implements DPNoise from "logreg.pdf":
@@ -93,6 +94,12 @@ class DPNoiseGenerator implements Computation<Vector<DRes<SReal>>, ProtocolBuild
         RealNumeric r = builder.realNumeric();
         int precision = builder.getRealNumericContext().getPrecision();
         double scale = 2.0 / (numberOfInputs * epsilon.doubleValue() * lambda.doubleValue());
+
+        log(builder, "Generating noise with epsilon " + epsilon
+            + ", lambda " + lambda
+            + ", shape " + numVars
+            + ", scale " + scale);
+
         DRes<SReal> noiseLen = builder.seq(GammaDistribution.random(numVars, scale, precision));
 
         Vector<DRes<SReal>> noise = new Vector<>();
