@@ -2,27 +2,20 @@
 
 pid1=
 pid2=
-extra_args=
+logistic_regression_args=""
 
-while [[ "$1" == -* ]]; do
-    if [[ "$1" = "-d" ]]; then
-        extra_args="${extra_args} --dummy"
-    elif [[ "$1" = "-dds" ]]; then
-        extra_args="${extra_args} --dummy-data-supplier"
-    fi
-    shift
-done
-
-if [[ -z "$1" ]]; then
-    echo "Usage: "
-    echo "  $0 [-d] <test-set>"
+if [[ -z "$1" || "$1" == "--help" || "$1" == "-h" ]]; then
+    java -jar target/logistic-regression-jar-with-dependencies.jar --help
     echo
-    echo "Example: $0 mtcars"
+    echo "Run script usage:"
     echo
-    echo "Optional parameter '-d' activates dummy suite instead of SPDZ."
-    echo "Optional parmater '-dds' activates dummy data supplier when using SPDZ (instead of Mascot)."
+    echo "    $0 <dataset> <options>"
     echo
-    echo "Available test sets:"
+    echo "where <options> are the options described above."
+    echo
+    echo "Example: $0 mtcars --privacy-budget 1"
+    echo
+    echo "Available datasets:"
     echo "  mtcars"
     echo "  breast_cancer"
     exit 1
@@ -42,6 +35,9 @@ ctrl_c() {
 main() {
     trap ctrl_c INT
 
+    dataset=$1
+    shift
+
     out1File=$(mktemp)
     out2File=$(mktemp)
 
@@ -49,19 +45,15 @@ main() {
         -jar target/logistic-regression-jar-with-dependencies.jar \
         -p1:localhost:8871 \
         -p2:localhost:8872 \
-        --privacy-budget 1 \
-        --unsafe-debug-log \
-        ${extra_args} \
-        -i1 < "target/classes/$1_party1.txt" > ${out1File} 2> party1.log &
+        $* \
+        -i1 < "target/classes/${dataset}_party1.txt" > ${out1File} &
     pid1=$!
     java \
         -jar target/logistic-regression-jar-with-dependencies.jar \
         -p1:localhost:8871 \
         -p2:localhost:8872 \
-        --privacy-budget 1 \
-        --unsafe-debug-log \
-        ${extra_args} \
-        -i2 < "target/classes/$1_party2.txt" > ${out2File} 2> party2.log &
+        $* \
+        -i2 < "target/classes/${dataset}_party2.txt" > ${out2File} 2> party2.log &
     pid2=$!
     wait
 
@@ -77,4 +69,4 @@ main() {
     fi
 }
 
-time main $1
+time main $*
