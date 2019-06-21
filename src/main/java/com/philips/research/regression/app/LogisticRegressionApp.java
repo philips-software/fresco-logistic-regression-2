@@ -114,7 +114,18 @@ public class LogisticRegressionApp implements Callable<Void> {
         description = "When using SPDZ, use this to use dummy data supplier instead of Mascot data supplier"
     )
     private boolean dummyDataSupplier;
-
+    @Option(
+        names = {"--mod-bit-length"},
+        defaultValue = "512",
+        description = "For experimenting; default is 512"
+    )
+    private int modBitLength;
+    @Option(
+        names = {"--max-bit-length"},
+        defaultValue = "200",
+        description = "For experimenting; default is 200"
+    )
+    private int maxBitLength;
 
     public static void main(String[] args) {
         CommandLine.call(new LogisticRegressionApp(), args);
@@ -141,9 +152,9 @@ public class LogisticRegressionApp implements Callable<Void> {
 
     private ApplicationRunner<List<BigDecimal>> createRunner(int myId, HashMap<Integer, Party> partyMap) {
         if (dummyArithmetic) {
-            return new DummyRunner<>(myId, partyMap);
+            return new DummyRunner<>(myId, partyMap, modBitLength, maxBitLength);
         } else {
-            return new SpdzRunner<>(myId, partyMap, dummyDataSupplier);
+            return new SpdzRunner<>(myId, partyMap, dummyDataSupplier, modBitLength, maxBitLength);
         }
     }
 
@@ -175,12 +186,11 @@ public class LogisticRegressionApp implements Callable<Void> {
 }
 
 abstract class ApplicationRunner <Output> {
-    final int modBitLength = 512;
     NetworkFactory networkFactory;
     Network network;
     BigInteger modulus;
 
-    ApplicationRunner(int myId, Map<Integer, Party> partyMap) {
+    ApplicationRunner(int myId, Map<Integer, Party> partyMap, int modBitLength) {
         network = new SocketNetwork(new NetworkConfigurationImpl(myId, partyMap));
         network = new NetworkLoggingDecorator(network);
         networkFactory = new NetworkFactory(partyMap);
@@ -198,17 +208,16 @@ abstract class ApplicationRunner <Output> {
 class SpdzRunner <Output> extends ApplicationRunner<Output> {
 
     static final int PRG_SEED_LENGTH = 256;
-    private static final int MAX_BIT_LENGTH = 200;
     private static final int FIXED_POINT_PRECISION = 16;
 
     private SecureComputationEngineImpl<SpdzResourcePool, ProtocolBuilderNumeric> sce;
     private SpdzResourcePoolImpl resourcePool;
 
-    SpdzRunner(int myId, Map<Integer, Party> partyMap, Boolean dummyDataSupplier) {
-        super(myId, partyMap);
+    SpdzRunner(int myId, Map<Integer, Party> partyMap, Boolean dummyDataSupplier, int modBitLength, int maxBitLength) {
+        super(myId, partyMap, modBitLength);
         int numberOfPlayers = partyMap.size();
 
-        SpdzProtocolSuite protocolSuite = new SpdzProtocolSuite(MAX_BIT_LENGTH, FIXED_POINT_PRECISION);
+        SpdzProtocolSuite protocolSuite = new SpdzProtocolSuite(maxBitLength, FIXED_POINT_PRECISION);
         BatchEvaluationStrategy<SpdzResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
         strategy = new BatchEvaluationLoggingDecorator<>(strategy);
         ProtocolEvaluator<SpdzResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
@@ -223,7 +232,7 @@ class SpdzRunner <Output> extends ApplicationRunner<Output> {
             Map<Integer, RotList> seedOts = getSeedOts(myId, partyIds, PRG_SEED_LENGTH, drbg, network);
             FieldElement ssk = SpdzMascotDataSupplier.createRandomSsk(definition, PRG_SEED_LENGTH);
             PreprocessedValuesSupplier preprocessedValuesSupplier
-                = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, ssk, MAX_BIT_LENGTH);
+                = new PreprocessedValuesSupplier(myId, numberOfPlayers, networkFactory, protocolSuite, modBitLength, definition, seedOts, ssk, maxBitLength);
             SpdzDataSupplier supplier = SpdzMascotDataSupplier.createSimpleSupplier(
                 myId, numberOfPlayers,
                 () -> networkFactory.createExtraNetwork(myId),
@@ -278,11 +287,11 @@ class DummyRunner <Output> extends ApplicationRunner<Output> {
     private DummyArithmeticResourcePoolImpl resourcePool;
     private SecureComputationEngine<DummyArithmeticResourcePool, ProtocolBuilderNumeric> sce;
 
-    DummyRunner(int myId, Map<Integer, Party> partyMap) {
-        super(myId, partyMap);
+    DummyRunner(int myId, Map<Integer, Party> partyMap, int modBitLength, int maxBitLength) {
+        super(myId, partyMap, modBitLength);
 
         final BigIntegerFieldDefinition definition = new BigIntegerFieldDefinition(modulus);
-        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(definition,200,16);
+        DummyArithmeticProtocolSuite protocolSuite = new DummyArithmeticProtocolSuite(definition, maxBitLength,16);
         BatchEvaluationStrategy<DummyArithmeticResourcePool> strategy = EvaluationStrategy.SEQUENTIAL.getStrategy();
         ProtocolEvaluator<DummyArithmeticResourcePool> evaluator = new BatchedProtocolEvaluator<>(strategy, protocolSuite);
         sce = new SecureComputationEngineImpl<>(protocolSuite, evaluator);
