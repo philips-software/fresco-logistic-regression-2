@@ -91,11 +91,17 @@ public class LogisticRegressionApp implements Callable<Void> {
     )
     private double privacyBudget;
     @Option(
-        names = {"--unsafe-debug-log"},
+        names = {"--trace"},
         defaultValue = "false",
-        description = "Enables debug logging. ⚠️ Warning: exposes secret values in order to log them! ⚠️"
+        description = "Enables trace logging. ⚠️ Warning: exposes secret values in order to log them! ⚠️"
     )
-    private boolean unsafeDebugLogging;
+    private boolean traceLogging;
+    @Option(
+        names = {"--debug"},
+        defaultValue = "false",
+        description = "Enables debug logging. Ignored when --trace is also passed. ⚠️ Warning: exposes secret values in order to log them! ⚠️"
+    )
+    private boolean debugLogging;
     @Option(
         names = {"--dummy"},
         defaultValue = "false",
@@ -142,9 +148,12 @@ public class LogisticRegressionApp implements Callable<Void> {
     }
 
     private void setLogLevel() {
-        if (unsafeDebugLogging) {
+        if (traceLogging) {
             Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
             logger.setLevel(Level.ALL);
+        } else if (debugLogging){
+            Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+            logger.setLevel(Level.DEBUG);
         }
     }
 
