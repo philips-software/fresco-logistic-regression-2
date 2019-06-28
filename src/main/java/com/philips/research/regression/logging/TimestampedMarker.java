@@ -30,9 +30,7 @@ public class TimestampedMarker implements Computation<Void, ProtocolBuilderNumer
     @Override
     public DRes<Void> buildComputation(ProtocolBuilderNumeric builder) {
         return builder.seq(seq -> {
-            if (seq.getBasicNumericContext().getMyId() == 1) {
-                logger.debug(message);
-            }
+            logger.debug(message);
             return null;
         });
     }
