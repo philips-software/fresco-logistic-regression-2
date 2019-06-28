@@ -46,7 +46,7 @@ main() {
         -p1:localhost:8871 \
         -p2:localhost:8872 \
         $* \
-        -i1 < "target/classes/${dataset}_party1.txt" > ${out1File} &
+        -i1 < "target/classes/${dataset}_party1.txt" > ${out1File} 2> party1.log &
     pid1=$!
     java \
         -jar target/logistic-regression-jar-with-dependencies.jar \
