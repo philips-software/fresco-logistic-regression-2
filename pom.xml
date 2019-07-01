@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.github.aicis</groupId>
       <artifactId>fresco-dp</artifactId>
-      <version>master-SNAPSHOT</version>
+      <version>master-d7a9cf0fb1-1</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
