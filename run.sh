@@ -4,6 +4,8 @@ pid1=
 pid2=
 logistic_regression_args=""
 
+test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
+
 if [[ -z "$1" || "$1" == "--help" || "$1" == "-h" ]]; then
     java -jar target/logistic-regression-jar-with-dependencies.jar --help
     echo
@@ -20,8 +22,6 @@ if [[ -z "$1" || "$1" == "--help" || "$1" == "-h" ]]; then
     echo "  breast_cancer"
     exit 1
 fi
-
-test -f target/logistic-regression-jar-with-dependencies.jar || mvn package
 
 echo "Started at $(date)"
 
